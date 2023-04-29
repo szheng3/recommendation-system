@@ -55,7 +55,7 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
-    parser.add_argument('--CQL_alpha', type=float, default = 0.0)
+    parser.add_argument('--CQL_alpha', type=float, default=0.0)
 
     return parser.parse_args()
 
@@ -76,7 +76,7 @@ class QNetwork:
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
         self.name = name
         self.lr_2=args.lr_2
-        self.CQL_alpha = 
+        self.CQL_alpha = CQL_alpha
         self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
         
         if CQL_alpha>0: 
