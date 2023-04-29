@@ -55,6 +55,7 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
+    parser.add_argument('--CQL_alpha', type=float, default = 0.0)
 
     return parser.parse_args()
 
@@ -75,6 +76,16 @@ class QNetwork:
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
         self.name = name
         self.lr_2=args.lr_2
+        self.CQL_alpha = 
+        self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
+        
+        if CQL_alpha>0: 
+            print('Using CQL loss.')
+            self.use_CQL = True
+        else:
+            print('Not using CQL loss')
+            self.use_QL = False
+
         with tf.compat.v1.variable_scope(self.name):
             self.all_embeddings=self.initialize_embeddings()
             self.inputs = tf.compat.v1.placeholder(tf.int32, [None, state_size])  # sequence of history, [batchsize,state_size]
@@ -255,6 +266,13 @@ class QNetwork:
                                                                           self.discount, self.targetQ_current_,
                                                                           self.targetQ_current_selector)[0]
 
+            ### adding CQL loss
+            cql_loss=0
+            if self.use_CQL:
+                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
+                cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
+
+
             ce_loss_pre = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
             ce_loss_post = tf.multiply(self.ips,ce_loss_pre)
 
@@ -272,7 +290,13 @@ class QNetwork:
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
 
-            self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
+            ### Incorporating CWL into loss1
+            if use_CQL:
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+
+            else:
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
+            
             self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
 
             self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
