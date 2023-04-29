@@ -291,7 +291,7 @@ class QNetwork:
 
 
             ### Incorporating CWL into loss1
-            if use_CQL:
+            if self.use_CQL:
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
 
             else:
