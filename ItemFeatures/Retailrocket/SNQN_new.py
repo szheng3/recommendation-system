@@ -55,6 +55,7 @@ def parse_args():
 class QNetwork:
     def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
         tf.compat.v1.disable_eager_execution()
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.state_size = state_size
         self.learning_rate = learning_rate
         self.hidden_size = hidden_size
@@ -357,6 +358,7 @@ if __name__ == '__main__':
         for i in range(args.epoch):
             for j in range(num_batches):
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
+                print(batch)
 
                 #state = list(batch['state'].values())
 
