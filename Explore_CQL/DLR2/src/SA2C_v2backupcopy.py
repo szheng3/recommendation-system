@@ -77,7 +77,7 @@ class QNetwork:
         self.name = name
         self.lr_2=args.lr_2
         self.CQL_alpha = args.CQL_alpha
-        #self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
+        self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
         
         if CQL_alpha>0: 
             print('Using CQL loss.')
