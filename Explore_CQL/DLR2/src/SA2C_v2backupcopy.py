@@ -79,12 +79,12 @@ class QNetwork:
         self.CQL_alpha = args.CQL_alpha
         self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
         
-        if CQL_alpha>0: 
+        if self.CQL_alpha>0: 
             print('Using CQL loss.')
             self.use_CQL = True
         else:
             print('Not using CQL loss')
-            self.use_QL = False
+            self.use_CQL = False
 
         with tf.compat.v1.variable_scope(self.name):
             self.all_embeddings=self.initialize_embeddings()
