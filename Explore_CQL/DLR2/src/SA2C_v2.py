@@ -266,18 +266,18 @@ class QNetwork:
                                                                           self.discount, self.targetQ_current_,
                                                                           self.targetQ_current_selector)[0]
 
-            ### adding CQL loss
-            cql_loss=0
-            if self.use_CQL:
-                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
-
-
             ce_loss_pre = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
             ce_loss_post = tf.multiply(self.ips,ce_loss_pre)
 
             q_indexed_positive = tf.stop_gradient(indexing_ops.batched_index(self.output1, self.actions))
             q_indexed_negative = 0
+            
+            ### adding CQL loss
+            cql_loss=0
+            if self.use_CQL:
+                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
+                cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
+            
             for i in range(self.neg):
                 negative=tf.gather(self.negative_actions, i, axis=1)
                 q_indexed_negative+=tf.stop_gradient(indexing_ops.batched_index(self.output1, negative))
