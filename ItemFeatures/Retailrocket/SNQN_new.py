@@ -346,6 +346,7 @@ if __name__ == '__main__':
                     state_size=state_size, pretrain=False)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
+    print(replay_buffer.head())
     # saver = tf.train.Saver()
 
     total_step=0
