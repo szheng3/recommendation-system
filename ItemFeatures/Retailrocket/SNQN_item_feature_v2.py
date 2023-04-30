@@ -305,17 +305,17 @@ class QNetwork:
 
             # CHANGES: Add another fully connected layer to encode the categorical features
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
-            print("feature embedding shape")
-            print(self.feature_embedding.shape)
+            # print("feature embedding shape")
+            # print(self.feature_embedding.shape)
             # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-            print("dot product shape")
-            print(dot_product.shape)
+            # print("dot product shape")
+            # print(dot_product.shape)
 
 
             # Add the bias term from feature_embedding[:, -1]
             # self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
-            # # self.phi_prime = tf.reshape(dot_product, [-1, 1])
+            self.phi_prime = tf.reshape(dot_product, [-1, 1])
             # print("phi_prime shape")
             # print(self.phi_prime.shape)
             # # CHANGES: Calculate phi'
@@ -463,8 +463,8 @@ if __name__ == '__main__':
                 for k in range(len(is_buy)):
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
-                print("targetQs_",target_Qs.shape)
-                print("item_features_np",item_features_np.shape)
+                # print("targetQs_",target_Qs.shape)
+                # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
                                               mainQN.len_state: len_state,
