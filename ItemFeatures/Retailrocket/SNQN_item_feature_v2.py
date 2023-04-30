@@ -463,7 +463,7 @@ if __name__ == '__main__':
                                               mainQN.targetQ_current_:target_Q_current,
                                               mainQN.targetQ_current_selector:target_Q__current_selector,
                                               mainQN.is_training:True,
-                                              mainQN.item_features: list(item_features_df['category_id'].values()),
+                                              mainQN.item_features: item_features_df['category_id'],
                                               })
                 total_step += 1
                 if total_step % 200 == 0:
