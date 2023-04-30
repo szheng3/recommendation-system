@@ -304,22 +304,11 @@ class QNetwork:
             # CHANGES: Add another fully connected layer to encode the categorical features
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                activation=None)
-            # print("feature embedding shape")
-            # print(self.feature_embedding.shape)
-            # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-            # print("dot product shape")
-            # print(dot_product.shape)
             reshaped_dot_product = tf.reshape(dot_product, shape=(-1, 70852))
 
-            # Add the bias term from feature_embedding[:, -1]
-            # self.phi_prime = self.feature_embedding[:, :, -1]
             self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
-            print("phi_prime shape")
-            print(self.phi_prime.shape)
-            # # CHANGES: Calculate phi'
-            # print("output2 shape")
-            # print(self.output2)
+
             lambda_value = 0.8
             final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
