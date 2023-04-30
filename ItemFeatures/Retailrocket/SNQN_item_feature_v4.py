@@ -285,16 +285,16 @@ class QNetwork:
                                                                                   item_num])  # used for select best action for double q learning
 
             # TRFL double qlearning
-            qloss_positive, _ = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
-                                                      self.targetQs_, self.targetQs_selector)
-            neg_reward = tf.constant(reward_negative, dtype=tf.float32, shape=(args.batch_size,))
-            qloss_negative = 0
-            for i in range(self.neg):
-                negative = tf.gather(self.negative_actions, i, axis=1)
-
-                qloss_negative += trfl.double_qlearning(self.output1, negative, neg_reward,
-                                                        self.discount, self.targetQ_current_,
-                                                        self.targetQ_current_selector)[0]
+            # qloss_positive, _ = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
+            #                                           self.targetQs_, self.targetQs_selector)
+            # neg_reward = tf.constant(reward_negative, dtype=tf.float32, shape=(args.batch_size,))
+            # qloss_negative = 0
+            # for i in range(self.neg):
+            #     negative = tf.gather(self.negative_actions, i, axis=1)
+            #
+            #     qloss_negative += trfl.double_qlearning(self.output1, negative, neg_reward,
+            #                                             self.discount, self.targetQ_current_,
+            #                                             self.targetQ_current_selector)[0]
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
