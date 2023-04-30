@@ -298,6 +298,8 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
+            self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None)
+            print(self.output2.shape)
             self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num,1])
 
             # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
@@ -306,19 +308,19 @@ class QNetwork:
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
+            # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
 
-            dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+            # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
 
             # Add the bias term from feature_embedding[:, -1]
-            self.phi_prime = tf.reshape(dot_product, [-1, 1])
+            # self.phi_prime = tf.reshape(dot_product, [-1, 1])
 
             # CHANGES: Calculate phi'
             # self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
 
 
-            lambda_value = 0.8
-            self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
+            # lambda_value = 0.8
+            # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
             # CHANGES: Provide the final score in the cross-entropy loss
             ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
