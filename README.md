@@ -1,5 +1,4 @@
-# Deep RL Recommender System for E-commerce --  Take Home Project for 
-AIPI531
+# Deep RL Recommender System for E-commerce --  Take Home Project for AIPI531
 
 ## Team Members
 
