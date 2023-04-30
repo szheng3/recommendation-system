@@ -313,7 +313,8 @@ class QNetwork:
 
 
             # Add the bias term from feature_embedding[:, -1]
-            self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
+            # self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
+            self.phi_prime = tf.reshape(dot_product, [-1, 1])
             print("phi_prime shape")
             print(self.phi_prime.shape)
             # CHANGES: Calculate phi'
