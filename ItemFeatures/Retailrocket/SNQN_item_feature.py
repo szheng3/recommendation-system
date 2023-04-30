@@ -290,10 +290,13 @@ class QNetwork:
                                                               name="item_features")
 
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-                                                                   activation=None, name="feature-embedding")
+                                                                   activation=None)
                 phi_prime = tf.matmul(self.states_hidden, self.feature_embedding[:, :-1],
                                            transpose_b=True) + self.feature_embedding[:, -1]
                 print("self.output2 shape:", self.output2.shape)
+                print("self.states_hidden shape:", self.states_hidden.shape)
+                print("self.feature_embedding shape:", self.feature_embedding.shape)
+                print("self.item_features shape:", self.item_features.shape)
                 print("phi_prime shape:", phi_prime.shape)
                 # self.final_output = tf.nn.softmax(self.output2 * self.phi_prime, axis=-1)
                 # Combine scores phi (self.output2) and phi' using lambda
