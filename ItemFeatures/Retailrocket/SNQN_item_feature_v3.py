@@ -299,7 +299,7 @@ class QNetwork:
             # item features
             # CHANGES: Add a placeholder for the category IDs
             self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None)
-            print(self.output2.shape)
+            print("output2",self.output2.shape)
             self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num,1])
 
             # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
