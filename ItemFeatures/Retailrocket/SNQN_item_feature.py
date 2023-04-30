@@ -355,7 +355,8 @@ if __name__ == '__main__':
     print("item_num:", item_num)
     item_category_df = pd.read_csv( os.path.join(data_directory, 'category_item.csv'))
     item_category_dict = dict(zip(item_category_df['itemid'], item_category_df['categoryid']))
-    item_feature_size = len(set(item_category_dict.values()))
+    item_feature_size = item_category_df['categoryid'].max()+1
+    # item_feature_size = len(set(item_category_dict.values()))
     item_features = np.zeros((item_num, item_feature_size))
 
     for item_id, category_id in item_category_dict.items():
