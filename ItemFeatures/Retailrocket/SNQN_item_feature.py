@@ -106,7 +106,7 @@ def evaluate(sess):
     print('#############################################################')
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain,item_feature_size=None, name='DQNetwork'):
         tf.compat.v1.disable_eager_execution()
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.state_size = state_size
@@ -118,6 +118,8 @@ class QNetwork:
         self.weight=args.weight
         self.model=args.model
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
+        self.item_feature_size = item_feature_size
+
         # self.save_file = save_file
         self.name = name
         with tf.compat.v1.variable_scope(self.name):
@@ -265,7 +267,7 @@ class QNetwork:
             # self.output2= tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
             #                                                  activation_fn=None, scope="ce-logits")  # all ce logits
             self.output1 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num,activation=None)
-            self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num,activation=None)
+            self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None, name="ce-logits")
 
             # TRFL way
             self.actions = tf.compat.v1.placeholder(tf.int32, [None])
@@ -284,13 +286,14 @@ class QNetwork:
 
             # Create item features placeholder if specified
             if self.item_feature_size:
-                self.item_features = tf.compat.v1.placeholder(tf.float32, [None, self.item_feature_size], name="item_features")
-                self.feature_weights, self.feature_biases = tf.compat.v1.layers.dense(self.item_features,
-                                                                                      self.hidden_size + 1,
-                                                                                      activation=None)
-                # Calculate score phi'
-                phi_prime = tf.matmul(self.states_hidden, self.feature_weights, transpose_b=True) + self.feature_biases
+                self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_feature_size],
+                                                              name="item_features")
 
+                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
+                                                                   activation=None, name="feature-embedding")
+                phi_prime = tf.matmul(self.states_hidden, self.feature_embedding[:, :-1],
+                                           transpose_b=True) + self.feature_embedding[:, -1]
+                # self.final_output = tf.nn.softmax(self.output2 * self.phi_prime, axis=-1)
                 # Combine scores phi (self.output2) and phi' using lambda
                 lambda_value = tf.constant(args.lambda_value, dtype=tf.float32)
                 final_score = lambda_value * self.output2 + (1 - lambda_value) * phi_prime
