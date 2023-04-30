@@ -305,12 +305,12 @@ class QNetwork:
 
             # CHANGES: Add another fully connected layer to encode the categorical features
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
-            print("feature embedding shape")
-            print(self.feature_embedding.shape)
+            # print("feature embedding shape")
+            # print(self.feature_embedding.shape)
             # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-            print("dot product shape")
-            print(dot_product.shape)
+            # print("dot product shape")
+            # print(dot_product.shape)
 
 
             # Add the bias term from feature_embedding[:, -1]
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 
     # item_features_np = item_features_df.iloc[:, 1:].values
 
-    print("feature_dim",feature_dim)
+    # print("feature_dim",feature_dim)
     # item_features_array = item_features_df.values[:, 1:].astype(np.float32)  # Assuming the first column is the itemid
     # padding_row = np.zeros((1, item_features_array.shape[1]), dtype=np.float32)
     # item_features_array = np.vstack((padding_row, item_features_array))
@@ -395,7 +395,7 @@ if __name__ == '__main__':
                     state_size=state_size, pretrain=False)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
-    print(replay_buffer.head())
+    # print(replay_buffer.head())
     # saver = tf.train.Saver()
 
     total_step=0
@@ -408,7 +408,7 @@ if __name__ == '__main__':
         for i in range(args.epoch):
             for j in range(num_batches):
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
-                print(batch)
+                # print(batch)
 
                 #state = list(batch['state'].values())
 
