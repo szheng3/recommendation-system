@@ -302,13 +302,14 @@ class QNetwork:
 
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                activation=None)
-            # self.feature_embeddings, self.feature_biases = tf.compat.v1.layers.dense(self.item_features, (
-            # self.item_num, self.hidden_size + 1), activation=None, name='feature_embeddings')
 
-            dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
 
-            # Add the bias term from feature_embedding[:, -1]
-            self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
+            # CHANGES: Add another fully connected layer to encode the categorical features
+            self.feature_embedding = tf.compat.v1.layers.dense(self.category_ids, self.hidden_size + 1, activation=None)
+
+            # CHANGES: Calculate phi'
+            self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
+
 
             lambda_value = 0.8
             self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
