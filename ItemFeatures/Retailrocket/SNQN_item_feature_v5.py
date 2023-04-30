@@ -305,7 +305,7 @@ class QNetwork:
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                activation=None)
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-            reshaped_dot_product = tf.reshape(dot_product, shape=(-1, 70852))
+            reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
             self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
 
