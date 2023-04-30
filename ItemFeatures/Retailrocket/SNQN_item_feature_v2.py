@@ -361,9 +361,9 @@ if __name__ == '__main__':
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='item_id', inplace=True)
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
-    # item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
+    item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
-    item_features_np = item_features_df.iloc[:, 1:].values
+    # item_features_np = item_features_df.iloc[:, 1:].values
 
     print("feature_dim",feature_dim)
     # item_features_array = item_features_df.values[:, 1:].astype(np.float32)  # Assuming the first column is the itemid
