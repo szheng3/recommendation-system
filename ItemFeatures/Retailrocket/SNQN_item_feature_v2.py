@@ -305,7 +305,7 @@ class QNetwork:
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size , activation=None)
+            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size+1 , activation=None)
 
             # CHANGES: Calculate phi'
             self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
