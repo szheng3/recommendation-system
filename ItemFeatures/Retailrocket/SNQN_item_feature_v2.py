@@ -357,7 +357,7 @@ if __name__ == '__main__':
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
 
     #item features
-    item_features_csv =  os.path.join(data_directory, 'category_item.csv')  # Replace this with the path to your CSV file
+    item_features_csv =  os.path.join(data_directory, 'category_item_filter.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='itemid', inplace=True)
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
