@@ -306,7 +306,7 @@ class QNetwork:
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size , activation=None)
+            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
 
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
 
