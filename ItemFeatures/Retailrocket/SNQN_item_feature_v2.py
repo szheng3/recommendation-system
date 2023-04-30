@@ -308,10 +308,14 @@ class QNetwork:
             print("feature embedding shape")
             print(self.feature_embedding.shape)
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+            print("dot product shape")
+            print(dot_product.shape)
+
 
             # Add the bias term from feature_embedding[:, -1]
             self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
-
+            print("phi_prime shape")
+            print(self.phi_prime.shape)
             # CHANGES: Calculate phi'
 
 
