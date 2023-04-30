@@ -323,9 +323,9 @@ class QNetwork:
             # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
             # CHANGES: Provide the final score in the cross-entropy loss
-            ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
+            # ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
 
-            # ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
+            ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
             self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
