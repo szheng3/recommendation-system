@@ -298,10 +298,8 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
-            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num,1])
+            self.item_features = tf.compat.v1.placeholder(tf.int8, [None, item_num,1])
 
-            # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-            #                                                    activation=None)
 
 
 
@@ -314,7 +312,6 @@ class QNetwork:
             self.phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, :, -1]
 
             # CHANGES: Calculate phi'
-            # self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
 
 
             lambda_value = 0.8
