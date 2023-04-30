@@ -293,6 +293,8 @@ class QNetwork:
                                                                    activation=None, name="feature-embedding")
                 phi_prime = tf.matmul(self.states_hidden, self.feature_embedding[:, :-1],
                                            transpose_b=True) + self.feature_embedding[:, -1]
+                print("self.output2 shape:", self.output2.shape)
+                print("phi_prime shape:", phi_prime.shape)
                 # self.final_output = tf.nn.softmax(self.output2 * self.phi_prime, axis=-1)
                 # Combine scores phi (self.output2) and phi' using lambda
                 # lambda_value = tf.constant(args.lambda_value, dtype=tf.float32)
@@ -385,7 +387,7 @@ if __name__ == '__main__':
     with tf.compat.v1.Session() as sess:
         # Initialize variables
         sess.run(tf.compat.v1.global_variables_initializer())
-        evaluate(sess)
+        # evaluate(sess)
         num_rows=replay_buffer.shape[0]
         num_batches=int(num_rows/args.batch_size)
         for i in range(args.epoch):
