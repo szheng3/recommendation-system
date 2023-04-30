@@ -298,14 +298,14 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
-            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, self.item_num, 1])
+            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, 1])
 
             # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
             #                                                    activation=None)
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1, activation=None)
+            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size , activation=None)
 
             # CHANGES: Calculate phi'
             self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
@@ -463,7 +463,7 @@ if __name__ == '__main__':
                                               mainQN.targetQ_current_:target_Q_current,
                                               mainQN.targetQ_current_selector:target_Q__current_selector,
                                               mainQN.is_training:True,
-                                              mainQN.item_features: item_features_np,
+                                              mainQN.item_features: item_features_df['category_id'],
                                               })
                 total_step += 1
                 if total_step % 200 == 0:
