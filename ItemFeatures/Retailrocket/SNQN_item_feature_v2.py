@@ -317,8 +317,8 @@ class QNetwork:
             print("phi_prime shape")
             print(self.phi_prime.shape)
             # CHANGES: Calculate phi'
-
-
+            print("output2 shape")
+            print(self.output2)
             lambda_value = 0.8
             self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
