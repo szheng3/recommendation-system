@@ -300,12 +300,12 @@ class QNetwork:
             # CHANGES: Add a placeholder for the category IDs
             self.item_features = tf.compat.v1.placeholder(tf.float32, [None, self.item_num, 1])
 
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-                                                               activation=None)
+            # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
+            #                                                    activation=None)
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.category_ids, self.hidden_size + 1, activation=None)
+            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1, activation=None)
 
             # CHANGES: Calculate phi'
             self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
