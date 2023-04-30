@@ -302,8 +302,8 @@ class QNetwork:
 
             self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                activation=None)
-            self.feature_embeddings, self.feature_biases = tf.compat.v1.layers.dense(self.item_features, (
-            self.item_num, self.hidden_size + 1), activation=None, name='feature_embeddings')
+            # self.feature_embeddings, self.feature_biases = tf.compat.v1.layers.dense(self.item_features, (
+            # self.item_num, self.hidden_size + 1), activation=None, name='feature_embeddings')
 
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
 
