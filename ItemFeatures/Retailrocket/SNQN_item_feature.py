@@ -295,7 +295,8 @@ class QNetwork:
                                            transpose_b=True) + self.feature_embedding[:, -1]
                 # self.final_output = tf.nn.softmax(self.output2 * self.phi_prime, axis=-1)
                 # Combine scores phi (self.output2) and phi' using lambda
-                lambda_value = tf.constant(args.lambda_value, dtype=tf.float32)
+                # lambda_value = tf.constant(args.lambda_value, dtype=tf.float32)
+                lambda_value = tf.constant(0.6, dtype=tf.float32)
                 final_score = lambda_value * self.output2 + (1 - lambda_value) * phi_prime
 
             # TRFL double qlearning
