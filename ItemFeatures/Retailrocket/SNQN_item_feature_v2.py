@@ -298,10 +298,11 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
-            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num,1])
+            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num])
 
             # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
             #                                                    activation=None)
+
 
 
             # CHANGES: Add another fully connected layer to encode the categorical features
@@ -451,7 +452,8 @@ if __name__ == '__main__':
                 for k in range(len(is_buy)):
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
-
+                print("targetQs_",target_Qs.shape)
+                print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
                                               mainQN.len_state: len_state,
