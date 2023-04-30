@@ -291,8 +291,13 @@ class QNetwork:
 
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size+1,
                                                                    activation=None)
-                phi_prime = tf.matmul(self.states_hidden, self.feature_embedding[:, :-1],
-                                           transpose_b=True) + self.feature_embedding[:, -1]
+                # Compute the dot product between states_hidden and feature_embedding[:, :-1]
+                dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :-1]))
+
+                # Add the bias term from feature_embedding[:, -1]
+                phi_prime = tf.reshape(dot_product, [-1, 1]) + self.feature_embedding[:, -1]
+
+                print("phi_prime shape:", phi_prime.shape)
                 print("self.output2 shape:", self.output2.shape)
                 print("self.states_hidden shape:", self.states_hidden.shape)
                 print("self.feature_embedding shape:", self.feature_embedding.shape)
