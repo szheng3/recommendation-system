@@ -9,6 +9,7 @@ from collections import deque
 from utility_v2 import pad_history, calculate_hit, calculate_off
 from NextItNetModules_v2 import *
 from SASRecModules_v2 import *
+from CQL_loss import compute_cql_loss
 
 import trfl
 from trfl import indexing_ops
@@ -272,12 +273,7 @@ class QNetwork:
             q_indexed_positive = tf.stop_gradient(indexing_ops.batched_index(self.output1, self.actions))
             q_indexed_negative = 0
             
-            ### adding CQL loss
-            cql_loss=0
-            if self.use_CQL:
-                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
-            
+           
             for i in range(self.neg):
                 negative=tf.gather(self.negative_actions, i, axis=1)
                 q_indexed_negative+=tf.stop_gradient(indexing_ops.batched_index(self.output1, negative))
@@ -289,6 +285,12 @@ class QNetwork:
 
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
+             ### adding CQL loss
+            cql_loss=0
+            if self.use_CQL:
+                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
+                cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
+              
 
             ### Incorporating CWL into loss1
             if self.use_CQL:
