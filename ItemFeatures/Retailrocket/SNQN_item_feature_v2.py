@@ -300,9 +300,10 @@ class QNetwork:
             # CHANGES: Add a placeholder for the category IDs
             self.item_features = tf.compat.v1.placeholder(tf.float32, [None, self.item_num, 1])
 
-            self.feature_embeddings, self.feature_biases = tf.compat.v1.layers.dense(self.item_features, (
-                self.item_num, self.hidden_size + 1), activation=None, name='feature_embeddings')
-
+            # self.feature_embeddings, self.feature_biases = tf.compat.v1.layers.dense(self.item_features, (
+            #     self.item_num, self.hidden_size + 1), activation=None, name='feature_embeddings')
+            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
+                                                               activation=None)
             # self.phi_prime = tf.matmul(self.states_hidden, self.feature_embeddings) + self.feature_biases
 
             dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :-1]))
