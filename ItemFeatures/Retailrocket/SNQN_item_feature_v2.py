@@ -353,6 +353,8 @@ class QNetwork:
 if __name__ == '__main__':
     # Network parameters
     args = parse_args()
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    tf.config.experimental.set_memory_growth(gpus[0], True)
 
     data_directory = args.data
     data_statis = pd.read_pickle(
