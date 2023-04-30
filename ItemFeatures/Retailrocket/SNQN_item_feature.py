@@ -289,7 +289,7 @@ class QNetwork:
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_feature_size],
                                                               name="item_features")
 
-                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size,
+                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size+1,
                                                                    activation=None)
                 phi_prime = tf.matmul(self.states_hidden, self.feature_embedding[:, :-1],
                                            transpose_b=True) + self.feature_embedding[:, -1]
