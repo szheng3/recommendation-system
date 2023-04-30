@@ -310,6 +310,8 @@ class QNetwork:
 
             # Calculate the final scores by performing a dot product between self.output2 and self.feature_embedding
             self.final_score = tf.matmul(self.output2, self.item_features_expanded)
+            self.final_score_squeezed = tf.squeeze(self.final_score, axis=[1, 3])
+
             # print("feature embedding shape")
             # print(self.feature_embedding.shape)
             # # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
