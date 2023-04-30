@@ -303,6 +303,7 @@ def evaluate(sess):
             evaluated+=1
         prediction=sess.run(QN_1.output2, feed_dict={QN_1.inputs: states,QN_1.len_state:len_states,QN_1.is_training:False})
         sorted_list=np.argsort(prediction)
+        print(sorted_list)
         calculate_hit(sorted_list,topk,actions,rewards,reward_click,total_reward,hit_clicks,ndcg_clicks,hit_purchase,ndcg_purchase)
     print('#############################################################')
     print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))

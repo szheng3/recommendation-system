@@ -52,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def evaluate(sess):
+def evaluate(sess, item_features_np, feature_dim):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
     eval_ids = eval_sessions.session_id.unique()
     groups = eval_sessions.groupby('session_id')
@@ -89,8 +89,9 @@ def evaluate(sess):
                 rewards.append(reward)
                 history.append(row['item_id'])
             evaluated += 1
-        prediction = sess.run(QN_1.output2,
-                              feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False})
+        prediction = sess.run(QN_1.final_score,
+                              feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
+                                         QN_1.item_features: item_features_np})
         sorted_list = np.argsort(prediction)
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
@@ -109,7 +110,7 @@ def evaluate(sess):
 
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, feature_dim=None, name='DQNetwork'):
         tf.compat.v1.disable_eager_execution()
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.state_size = state_size
@@ -123,6 +124,7 @@ class QNetwork:
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
         # self.save_file = save_file
         self.name = name
+        self.feature_dim = feature_dim
         with tf.compat.v1.variable_scope(self.name):
             self.all_embeddings = self.initialize_embeddings()
             self.inputs = tf.compat.v1.placeholder(tf.int32,
@@ -299,23 +301,25 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
-            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, 1])
+            if self.feature_dim is not None:
+                self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
 
-            # CHANGES: Add another fully connected layer to encode the categorical features
-            self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-                                                               activation=None)
-            dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-            reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
+                # CHANGES: Add another fully connected layer to encode the categorical features
+                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
+                                                                   activation=None)
+                dot_product = tf.matmul(self.states_hidden,
+                                        tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+                reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
-            self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
+                self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
 
-            lambda_value = 0.8
-            final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
+                lambda_value = 0.8
+                self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
-            # CHANGES: Provide the final score in the cross-entropy loss
-            ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=final_score)
-
-            # ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
+                # CHANGES: Provide the final score in the cross-entropy loss
+                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
+            else:
+                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
             self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
@@ -378,9 +382,9 @@ if __name__ == '__main__':
     tf.compat.v1.reset_default_graph()
 
     QN_1 = QNetwork(name='QN_1', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
     QN_2 = QNetwork(name='QN_2', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
     # print(replay_buffer.head())
@@ -471,4 +475,4 @@ if __name__ == '__main__':
                 if total_step % 200 == 0:
                     print("the loss in %dth batch is: %f" % (total_step, loss))
                 if total_step % 4000 == 0:
-                    evaluate(sess)
+                    evaluate(sess, item_features_np, feature_dim)
