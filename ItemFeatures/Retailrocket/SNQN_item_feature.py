@@ -352,6 +352,15 @@ if __name__ == '__main__':
         os.path.join(data_directory, 'data_statis.df'))  # read data statistics, includeing state_size and item_num
     state_size = data_statis['state_size'][0]  # the length of history to define the state
     item_num = data_statis['item_num'][0]  # total number of items
+    print("item_num:", item_num)
+    item_category_df = pd.read_csv( os.path.join(data_directory, 'category_item.csv'))
+    item_category_dict = dict(zip(item_category_df['itemid'], item_category_df['categoryid']))
+    item_feature_size = len(set(item_category_dict.values()))
+    item_features = np.zeros((item_num, item_feature_size))
+
+    for item_id, category_id in item_category_dict.items():
+        item_features[item_id, category_id] = 1
+
     reward_click = args.r_click
     reward_buy = args.r_buy
     reward_negative=args.r_negative
@@ -361,9 +370,9 @@ if __name__ == '__main__':
     tf.compat.v1.reset_default_graph()
 
     QN_1 = QNetwork(name='QN_1', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False,item_feature_size=item_feature_size)
     QN_2 = QNetwork(name='QN_2', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False,item_feature_size=item_feature_size)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
     print(replay_buffer.head())
@@ -446,7 +455,8 @@ if __name__ == '__main__':
                                               mainQN.negative_actions:negative,
                                               mainQN.targetQ_current_:target_Q_current,
                                               mainQN.targetQ_current_selector:target_Q__current_selector,
-                                              mainQN.is_training:True
+                                              mainQN.is_training:True,
+                                              mainQN.item_features: item_features
                                               })
                 total_step += 1
                 if total_step % 200 == 0:
