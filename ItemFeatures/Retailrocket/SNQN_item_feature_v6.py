@@ -327,8 +327,8 @@ class QNetwork:
                 # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
                 # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
                 self.final_score = tf.add(
-                    tf.multiply(self.lambda_value, self.output2),
-                    tf.multiply(tf.subtract(1.0, self.lambda_value), self.phi_prime)
+                    tf.multiply(self.lambda_values, self.output2),
+                    tf.multiply(tf.subtract(1.0, self.lambda_values), self.phi_prime)
                 )
 
                 # CHANGES: Provide the final score in the cross-entropy loss
