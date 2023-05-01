@@ -18,6 +18,36 @@ where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-valu
 
 ## Instructions for Running the Code
 
+## Evaluation
+
+### Metrics
+
+**Normalized Discounted Cumulative Gain (NDCG)**: NDCG is an offline reinforcement learning evaluation metric that takes two factors into consideration:
+    - how relevant are the results?
+    - how accurate is the ordering of these results?.
+
+To understand how NDCG works, we need to start with an understanding of what *gain* is. Gain is simply defined as the relevance score for a given recommendation. Depending on your use case, there are different methods to measure the relevance of a recommendation. To find the *cumulative gain*, we can simply calculate the sum of gains across all the recommendations. Usually this is calculated for the first K recommendations.
+
+$$ CG = \sum^{K}_{i=1}G_i $$
+
+Now that we have calculated the relevancy of the recommendations, we want to understand how good the ordering of the recommendations is. This is where *discounted cumulative gain* comes in. discounted cumulative gain weighs the relevance of recommendations by the item's position in the reocmmendations. The top recommended items get the highest weight.
+
+$$ DCG = \sum^{K}_{i=1} \frac{G_i}{log_2(i+1)}$$
+
+Finally we can calculate NDCG by normalizing the dicounted cumulative gain. To do this, we will divide by the *ideal discounted cumulative gain*:
+
+$$ IDCG = \sum^{K}_{i=1} \frac{G^{ideal}_i}{log_2(i+1)}$$
+$$ NDCG = $\frac{DCG}{IDCG}$$
+
+A score of 0 means the recommendations are useless, while a score of 1 means they are perfect. If you would like to learn more, here is a great [resource](https://machinelearninginterview.com/topics/machine-learning/ndcg-evaluation-metric-for-recommender-systems/).
+
+**Hit Ratio (HR)**: Hit ratio represents the fraction of users for which the "correct answer" is included in the top K items of their recommendation list. Hit ratio has a value between 0 and 1, where 0 means no customers have the best item in their recommendation list, and 1 means that every customer has the best item included in the first K items of their recommendation list.
+
+If we define *C* to be the number of users with the correct answer recommended to them, and *T* to tbe the total number of users, we can calculate hit ratio with the following equation:
+
+$$ HR = \frac{C}{T}$$
+
+### Results
 
 
 ## Contributions
