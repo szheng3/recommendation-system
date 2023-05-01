@@ -472,10 +472,6 @@ if __name__ == '__main__':
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
 
-                print("len_state")
-                print(len_state)
-
-                print("lambda_values")
                 lambda_values=[x/state_size for x in len_state]
                 print(lambda_values)
                 # print("item_features_np",item_features_np.shape)
