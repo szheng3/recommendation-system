@@ -1,7 +1,16 @@
 # Deep RL Recommender System for E-commerce --  Take Home Project for AIPI531
 
-## Team Members
+## Team Members: Chad Miller, Andrew Bonafede, Shuai Zhuang, Yilun Wu, Bryce Whitney
 
+## Content
+- [Conservative Q-Learning](#conservative-q-learning)
+- [Dataset Descriptions](#datasets)
+- [Running the Code](#instructions-for-running-the-code)
+- [Evaluation Metrics](#evaluation)
+- [RetailRocket Results](retailrocket-results)
+- [H&M Results](#hm-results)
+- [Contributions](#contributions)
+- [References](#references)
 
 ## Conservative Q-Learning
 Conservative Q-Learning (CQL) algorithm is a SAC-based data-driven deep reinforcement learning algorithm, which achieves state-of-the-art performance in offline RL problems. CQL mitigates overestimation error by minimizing action-values under the current policy and maximizing values under data distribution for underestimation issue. Its goal is to improve the performance by incorporating an additional loss term in the training process. As a result, the CQL loss encourages the agent to explore more efficiently by contrasting its Q-values against the Q-values of other actions that are not in the dataset.
