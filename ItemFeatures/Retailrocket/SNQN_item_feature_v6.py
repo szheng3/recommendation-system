@@ -54,7 +54,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def evaluate(sess, item_features_np, feature_dim):
+def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
     eval_ids = eval_sessions.session_id.unique()
     groups = eval_sessions.groupby('session_id')
@@ -69,6 +69,7 @@ def evaluate(sess, item_features_np, feature_dim):
     ndcg_purchase = [0, 0, 0, 0]
     while evaluated < len(eval_ids):
         states, len_states, actions, rewards = [], [], [], []
+
         for i in range(batch):
             if evaluated == len(eval_ids):
                 break
@@ -91,9 +92,11 @@ def evaluate(sess, item_features_np, feature_dim):
                 rewards.append(reward)
                 history.append(row['item_id'])
             evaluated += 1
+        lambda_values = [x / state_size for x in len_states]
+        print(lambda_values)
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
-                                         QN_1.item_features: item_features_np})
+                                         QN_1.item_features: item_features_np, QN_1.lambda_values: lambda_values})
         sorted_list = np.argsort(prediction)
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
@@ -306,6 +309,8 @@ class QNetwork:
             # CHANGES: Add a placeholder for the category IDs
             if self.feature_dim is not None:
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
+                self.lambda_values = tf.compat.v1.placeholder(tf.float32,
+                                                       [None])  # sequence of history, [batchsize,state_size]
 
                 # CHANGES: Add another fully connected layer to encode the categorical features
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
@@ -317,7 +322,7 @@ class QNetwork:
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
                 print("lambda_value", args.lambda_value)
 
-                lambda_value = args.lambda_value
+                lambda_value = self.lambda_values
                 self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
                 # CHANGES: Provide the final score in the cross-entropy loss
@@ -462,9 +467,10 @@ if __name__ == '__main__':
 
                 print("len_state")
                 print(len_state)
-                print("state shape")
-                print(state)
-                # print("len_state/state shape",len_state/13)
+
+                print("lambda_values")
+                lambda_values=[x/state_size for x in len_state]
+                print(lambda_values)
                 # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
@@ -479,9 +485,10 @@ if __name__ == '__main__':
                                               mainQN.targetQ_current_selector: target_Q__current_selector,
                                               mainQN.is_training: True,
                                               mainQN.item_features: item_features_np,
+                                              mainQN.lambda_values: lambda_values
                                               })
                 total_step += 1
                 if total_step % 200 == 0:
                     print("the loss in %dth batch is: %f" % (total_step, loss))
                 if total_step % 4000 == 0:
-                    evaluate(sess, item_features_np, feature_dim)
+                    evaluate(sess, item_features_np)
