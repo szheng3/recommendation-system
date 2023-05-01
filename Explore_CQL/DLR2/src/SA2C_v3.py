@@ -300,25 +300,29 @@ class QNetwork:
 
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
-             ### adding CQL loss
+             ### adding CQL loss like in the discrete CQL portion of d3rlpy
             cql_loss=0
             if self.use_CQL:
                 # logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
                 # cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
               
                 logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
-                cql_loss = tf.reduce_mean(logsumexp_qvals - q_indexed_positive_cql)
+                #q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
+                #q_index_negative_cql = indexing_ops.batched_index(self.output1, self.actions)
+                
+
+                cql_loss_positive = tf.reduce_mean(logsumexp_qvals - q_indexed_positive)
+                cql_loss_negative = tf.reduce(mean(logsumexp_qvals - q_indexed_negative)
+
 
             ### Incorporating CWL into loss1
             if self.use_CQL:
-                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss_pre) 
 
             else:
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
             
             self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
-
             self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
             self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
