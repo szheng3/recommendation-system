@@ -48,6 +48,8 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
+    parser.add_argument('--lambda_value', type=float, default=0.8,
+                        help='lambda for the function combining')
 
     return parser.parse_args()
 
@@ -107,6 +109,7 @@ def evaluate(sess, item_features_np, feature_dim):
         print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
+    return hit_purchase[0]
 
 
 class QNetwork:
@@ -312,8 +315,9 @@ class QNetwork:
                 reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
+                print("lambda_value", args.lambda_value)
 
-                lambda_value = 0.8
+                lambda_value = args.lambda_value
                 self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
                 # CHANGES: Provide the final score in the cross-entropy loss
