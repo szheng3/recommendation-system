@@ -10,6 +10,7 @@ from utility_v2 import pad_history, calculate_hit, calculate_off
 from NextItNetModules_v2 import *
 from SASRecModules_v2 import *
 from CQL_loss import compute_cql_loss
+from CQL_class import CQL
 
 import trfl
 from trfl import indexing_ops
@@ -300,14 +301,32 @@ class QNetwork:
 
 
 
+
+
              ### adding CQL loss
             cql_loss=0
             if self.use_CQL:
                 #logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
                 #cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
                 # Calculate CQL Loss
-                target_log_pi = tf.reduce_logsumexp(self.output1, axis=1)
-                cql_loss = tf.reduce_mean(target_log_pi - self.log_pi)
+                # target_log_pi = tf.reduce_logsumexp(self.output1, axis=1)
+                # cql_loss = tf.reduce_mean(target_log_pi - self.log_pi)
+
+
+                # Instantiate the CQL class with the appropriate Q-function and policy network
+                cql = CQL(q_function=self.q_function, policy_network=self.policy_network)
+
+                # Prepare the required inputs for the CQL update function
+                states = self.states_hidden
+                actions = self.actions
+                rewards = self.reward
+                next_states = asdfkjlkj
+                is_terminal = asdfjkjlkj
+
+                # Calculate cql_loss from the CQL class 
+                cql_loss = cql.update(states, actions, rewards, next_states, is_terminal)
+
+
 
 
             ### Incorporating CWL into loss1
@@ -320,6 +339,16 @@ s               elf.loss2 = tf.reduce_mean(input_tensor=self.weight * (qloss_pos
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
                 self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
             
+
+
+
+
+
+
+
+
+
+
             self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)  
             self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
