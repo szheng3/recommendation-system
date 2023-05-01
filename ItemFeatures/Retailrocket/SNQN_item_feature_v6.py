@@ -320,10 +320,16 @@ class QNetwork:
                 reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
-                print("lambda_value", args.lambda_value)
+                # print("lambda_value", args.lambda_value)
 
-                lambda_value = self.lambda_values
-                self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
+                # lambda_value = self.lambda_values
+                # one_tensor = tf.ones_like(self.lambda_values)
+                # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
+                # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
+                self.final_score = tf.add(
+                    tf.multiply(self.lambda_value, self.output2),
+                    tf.multiply(tf.subtract(1.0, self.lambda_value), self.phi_prime)
+                )
 
                 # CHANGES: Provide the final score in the cross-entropy loss
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
