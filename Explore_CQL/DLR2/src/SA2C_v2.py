@@ -256,7 +256,7 @@ class QNetwork:
 
 
             # TRFL double qlearning
-            qloss_positive, _ = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
+            qloss_positive, qlearning_info = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
                                                       self.targetQs_, self.targetQs_selector)
             neg_reward=tf.constant(reward_negative,dtype=tf.float32, shape=(args.batch_size,))
             qloss_negative=0
