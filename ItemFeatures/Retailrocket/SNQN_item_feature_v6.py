@@ -93,10 +93,10 @@ def evaluate(sess, item_features_np):
                 history.append(row['item_id'])
             evaluated += 1
         lambda_values = [x / state_size for x in len_states]
-        print(lambda_values)
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
                                          QN_1.item_features: item_features_np, QN_1.lambda_values: lambda_values})
+        print(prediction)
         sorted_list = np.argsort(prediction)
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
@@ -473,7 +473,6 @@ if __name__ == '__main__':
                 discount = [args.discount] * len(action)
 
                 lambda_values=[x/state_size for x in len_state]
-                print(lambda_values)
                 # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
