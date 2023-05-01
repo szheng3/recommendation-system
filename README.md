@@ -16,6 +16,10 @@ where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-valu
 
 ## Datasets
 
+### Retail Rocket
+
+### Dataset 2
+
 ## Instructions for Running the Code
 
 ## Evaluation
@@ -49,6 +53,49 @@ $$ HR = \frac{C}{T}$$
 
 ### Results
 
+#### Without CQL Loss
+
+<table>
+<tr><th> Clicks </th>
+<tr><td>
+
+|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|--------|----|-----|-----|-----|
+|SASRec-SA2C||||||||
+|SASRec-SNQN||||||||
+</td></tr> </table>
+
+<table>
+<tr><th> Purchase </th>
+<tr><td>
+
+|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|--------|----|-----|-----|-----|
+|SASRec-SA2C||||||||
+|SASRec-SNQN||||||||
+</td></tr> </table>
+
+#### With CQL Loss
+
+<table>
+<tr><th> Clicks </th>
+<tr><td>
+
+|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|--------|----|-----|-----|-----|
+|SASRec-SA2C||||||||
+|SASRec-SNQN||||||||
+</td></tr> </table>
+
+<table>
+<tr><th> Purchase </th>
+<tr><td>
+
+|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|--------|----|-----|-----|-----|
+|SASRec-SA2C||||||||
+|SASRec-SNQN||||||||
+</td></tr> </table>
 
 ## Contributions
 
