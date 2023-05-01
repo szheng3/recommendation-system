@@ -459,7 +459,11 @@ if __name__ == '__main__':
                 for k in range(len(is_buy)):
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
-                # print("targetQs_",target_Qs.shape)
+
+                print("len_state shape",len_state.shape)
+                print(len_state)
+                print("state shape",state.shape)
+                print(state)
                 # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
