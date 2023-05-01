@@ -462,9 +462,9 @@ if __name__ == '__main__':
 
                 print("len_state")
                 print(len_state)
-                print("state shape",len(state[0]))
+                print("state shape")
                 print(state)
-                print("len_state/state shape",len_state/13)
+                # print("len_state/state shape",len_state/13)
                 # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
