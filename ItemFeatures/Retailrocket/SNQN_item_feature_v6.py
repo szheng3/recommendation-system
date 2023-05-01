@@ -92,11 +92,11 @@ def evaluate(sess, item_features_np):
                 rewards.append(reward)
                 history.append(row['item_id'])
             evaluated += 1
-        lambda_values = [x / state_size for x in len_states]
+        # lambda_values = [x / state_size for x in len_states]
+        lambda_values = [(x / state_size) if (x / state_size) < 0.3 else 1.0 for x in len_state]
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
                                          QN_1.item_features: item_features_np, QN_1.lambda_values: lambda_values})
-        print(prediction)
         sorted_list = np.argsort(prediction)
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
@@ -112,7 +112,6 @@ def evaluate(sess, item_features_np):
         print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
-    return hit_purchase[0]
 
 
 class QNetwork:
@@ -472,7 +471,9 @@ if __name__ == '__main__':
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
 
-                lambda_values=[x/state_size for x in len_state]
+                # lambda_values=[x/state_size for x in len_state]
+                lambda_values = [(x / state_size) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+
                 # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
