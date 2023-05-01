@@ -1,21 +1,18 @@
-import warnings
-warnings.filterwarnings("ignore")
 import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
 import argparse
 from collections import deque
-from utility_v2 import pad_history, calculate_hit, calculate_off
-from NextItNetModules_v2 import *
-from SASRecModules_v2 import *
-from CQL_loss import compute_cql_loss
+from utility import pad_history,calculate_hit,calculate_off
+from NextItNetModules import *
+from SASRecModules import *
 
 import trfl
 from trfl import indexing_ops
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run naive double q learning.")
+    parser = argparse.ArgumentParser(description="Run nive double q learning.")
 
     parser.add_argument('--epoch', type=int, default=50,
                         help='Number of max epochs.')
@@ -56,13 +53,12 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
-    parser.add_argument('--CQL_alpha', type=float, default=0.0)
 
     return parser.parse_args()
 
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, cql=False, name='DQNetwork'):
         self.state_size = state_size
         self.learning_rate = learning_rate
         self.hidden_size = hidden_size
@@ -72,40 +68,31 @@ class QNetwork:
         self.weight=args.weight
         self.smooth=args.smooth
         self.clip=args.clip
+        self.cql = cql
         # self.save_file = save_file
         self.model = args.model
-        self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
+        self.is_training = tf.placeholder(tf.bool, shape=())
         self.name = name
         self.lr_2=args.lr_2
-        self.CQL_alpha = args.CQL_alpha
-        #self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
-        
-        if self.CQL_alpha>0: 
-            print('Using CQL loss.')
-            self.use_CQL = True
-        else:
-            print('Not using CQL loss')
-            self.use_CQL = False
-
-        with tf.compat.v1.variable_scope(self.name):
+        with tf.variable_scope(self.name):
             self.all_embeddings=self.initialize_embeddings()
-            self.inputs = tf.compat.v1.placeholder(tf.int32, [None, state_size])  # sequence of history, [batchsize,state_size]
-            self.len_state = tf.compat.v1.placeholder(tf.int32, [
+            self.inputs = tf.placeholder(tf.int32, [None, state_size])  # sequence of history, [batchsize,state_size]
+            self.len_state = tf.placeholder(tf.int32, [
                 None])  # the length of valid positions, because short sesssions need to be padded
 
             # one_hot_input = tf.one_hot(self.inputs, self.item_num+1)
-            self.input_emb = tf.nn.embedding_lookup(params=self.all_embeddings['state_embeddings'], ids=self.inputs)
+            self.input_emb = tf.nn.embedding_lookup(self.all_embeddings['state_embeddings'], self.inputs)
 
             if self.model=='GRU':
-                gru_out, self.states_hidden = tf.compat.v1.nn.dynamic_rnn(
-                    tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size),
+                gru_out, self.states_hidden = tf.nn.dynamic_rnn(
+                    tf.contrib.rnn.GRUCell(self.hidden_size),
                     self.input_emb,
                     dtype=tf.float32,
                     sequence_length=self.len_state,
                 )
 
             if self.model=='Caser':
-                mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
+                mask = tf.expand_dims(tf.to_float(tf.not_equal(self.inputs, item_num)), -1)
 
                 self.input_emb *= mask
                 self.embedded_chars_expanded = tf.expand_dims(self.input_emb, -1)
@@ -115,15 +102,15 @@ class QNetwork:
                 num_filters = args.num_filters
                 filter_sizes = eval(args.filter_sizes)
                 for i, filter_size in enumerate(filter_sizes):
-                    with tf.compat.v1.name_scope("conv-maxpool-%s" % filter_size):
+                    with tf.name_scope("conv-maxpool-%s" % filter_size):
                         # Convolution Layer
                         filter_shape = [filter_size, self.hidden_size, 1, num_filters]
-                        W = tf.Variable(tf.random.truncated_normal(filter_shape, stddev=0.1), name="W")
+                        W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
                         b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="b")
 
                         conv = tf.nn.conv2d(
-                            input=self.embedded_chars_expanded,
-                            filters=W,
+                            self.embedded_chars_expanded,
+                            W,
                             strides=[1, 1, 1, 1],
                             padding="VALID",
                             name="conv")
@@ -132,8 +119,8 @@ class QNetwork:
                         # Maxpooling over the outputs
                         # new shape after max_pool[?, 1, 1, num_filters]
                         # be carefyul, the  new_sequence_length has changed because of wholesession[:, 0:-1]
-                        pooled = tf.nn.max_pool2d(
-                            input=h,
+                        pooled = tf.nn.max_pool(
+                            h,
                             ksize=[1, state_size - filter_size + 1, 1, 1],
                             strides=[1, 1, 1, 1],
                             padding='VALID',
@@ -145,13 +132,13 @@ class QNetwork:
                 self.h_pool = tf.concat(pooled_outputs, 3)
                 self.h_pool_flat = tf.reshape(self.h_pool, [-1, num_filters_total])  # shape=[batch_size, 384]
                 # design the veritcal cnn
-                with tf.compat.v1.name_scope("conv-verical"):
+                with tf.name_scope("conv-verical"):
                     filter_shape = [self.state_size, 1, 1, 1]
-                    W = tf.Variable(tf.random.truncated_normal(filter_shape, stddev=0.1), name="W")
+                    W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1), name="W")
                     b = tf.Variable(tf.constant(0.1, shape=[1]), name="b")
                     conv = tf.nn.conv2d(
-                        input=self.embedded_chars_expanded,
-                        filters=W,
+                        self.embedded_chars_expanded,
+                        W,
                         strides=[1, 1, 1, 1],
                         padding="VALID",
                         name="conv")
@@ -160,13 +147,13 @@ class QNetwork:
                 self.final = tf.concat([self.h_pool_flat, self.vcnn_flat], 1)  # shape=[batch_size, 384+100]
 
                 # Add dropout
-                with tf.compat.v1.name_scope("dropout"):
-                    self.states_hidden = tf.compat.v1.layers.dropout(self.final,
+                with tf.name_scope("dropout"):
+                    self.states_hidden = tf.layers.dropout(self.final,
                                                           rate=args.dropout_rate,
-                                                          training=tf.convert_to_tensor(value=self.is_training))
+                                                          training=tf.convert_to_tensor(self.is_training))
             if self.model=='NItNet':
 
-                mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
+                mask = tf.expand_dims(tf.to_float(tf.not_equal(self.inputs, item_num)), -1)
 
                 # self.input_emb=tf.nn.embedding_lookup(all_embeddings['state_embeddings'],self.inputs)
                 self.model_para = {
@@ -175,8 +162,8 @@ class QNetwork:
                     'kernel_size': 3,
                 }
 
-                context_embedding = tf.nn.embedding_lookup(params=self.all_embeddings['state_embeddings'],
-                                                           ids=self.inputs)
+                context_embedding = tf.nn.embedding_lookup(self.all_embeddings['state_embeddings'],
+                                                           self.inputs)
                 context_embedding *= mask
 
                 dilate_output = context_embedding
@@ -190,22 +177,22 @@ class QNetwork:
                 self.states_hidden = extract_axis_1(dilate_output, self.len_state - 1)
 
             if self.model=='SASRec':
-                pos_emb = tf.nn.embedding_lookup(params=self.all_embeddings['pos_embeddings'],
-                                                 ids=tf.tile(tf.expand_dims(tf.range(tf.shape(input=self.inputs)[1]), 0),
-                                                         [tf.shape(input=self.inputs)[0], 1]))
+                pos_emb = tf.nn.embedding_lookup(self.all_embeddings['pos_embeddings'],
+                                                 tf.tile(tf.expand_dims(tf.range(tf.shape(self.inputs)[1]), 0),
+                                                         [tf.shape(self.inputs)[0], 1]))
                 self.seq = self.input_emb + pos_emb
 
-                mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
+                mask = tf.expand_dims(tf.to_float(tf.not_equal(self.inputs, item_num)), -1)
                 # Dropout
-                self.seq = tf.compat.v1.layers.dropout(self.seq,
+                self.seq = tf.layers.dropout(self.seq,
                                              rate=args.dropout_rate,
-                                             training=tf.convert_to_tensor(value=self.is_training))
+                                             training=tf.convert_to_tensor(self.is_training))
                 self.seq *= mask
 
                 # Build blocks
 
                 for i in range(args.num_blocks):
-                    with tf.compat.v1.variable_scope("num_blocks_%d" % i):
+                    with tf.variable_scope("num_blocks_%d" % i):
                         # Self-attention
                         self.seq = multihead_attention(queries=normalize(self.seq),
                                                        keys=self.seq,
@@ -225,45 +212,53 @@ class QNetwork:
                 self.seq = normalize(self.seq)
                 self.states_hidden = extract_axis_1(self.seq, self.len_state - 1)
 
-            self.output1 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
-                                                            activation=None)  # all q-values
+            self.output1 = tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
+                                                            activation_fn=None)  # all q-values
 
-            self.output2= tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
-                                                             activation=None)  # all ce logits
+            self.output2= tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
+                                                             activation_fn=None, scope="ce-logits")  # all ce logits
 
             # TRFL way
-            self.actions = tf.compat.v1.placeholder(tf.int32, [None])
+            self.actions = tf.placeholder(tf.int32, [None])
 
-            self.negative_actions=tf.compat.v1.placeholder(tf.int32,[None,self.neg])
+            self.negative_actions=tf.placeholder(tf.int32,[None,self.neg])
 
-            self.targetQs_ = tf.compat.v1.placeholder(tf.float32, [None, item_num])
-            self.targetQs_selector = tf.compat.v1.placeholder(tf.float32, [None,
+            self.targetQs_ = tf.placeholder(tf.float32, [None, item_num])
+            self.targetQs_selector = tf.placeholder(tf.float32, [None,
                                                                  item_num])  # used for select best action for double q learning
-            self.reward = tf.compat.v1.placeholder(tf.float32, [None])
-            self.discount = tf.compat.v1.placeholder(tf.float32, [None])
+            self.reward = tf.placeholder(tf.float32, [None])
+            self.discount = tf.placeholder(tf.float32, [None])
 
-            self.targetQ_current_ = tf.compat.v1.placeholder(tf.float32, [None, item_num])
-            self.targetQ_current_selector = tf.compat.v1.placeholder(tf.float32, [None,
+            self.targetQ_current_ = tf.placeholder(tf.float32, [None, item_num])
+            self.targetQ_current_selector = tf.placeholder(tf.float32, [None,
                                                                  item_num])  # used for select best action for double q learning
 
             # calculate propensity score
             ce_logits = tf.stop_gradient(self.output2)
             target_prob = indexing_ops.batched_index(tf.nn.softmax(ce_logits), self.actions)
-            self.behavior_prob = tf.compat.v1.placeholder(tf.float32, [None], name='behavior_prob')
+            self.behavior_prob = tf.placeholder(tf.float32, [None], name='behavior_prob')
             self.ips = tf.math.divide(target_prob, self.behavior_prob)
             self.ips = tf.clip_by_value(self.ips, 0.1, 10)
             self.ips = tf.pow(self.ips, self.smooth)
 
 
             # TRFL double qlearning
-            qloss_positive, qlearning_info = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
+            if self.cql:
+                qloss_positive, _ = trfl.double_cql(self.output1, self.actions, self.reward, self.discount,
+                                                      self.targetQs_, self.targetQs_selector)
+            else:
+                qloss_positive, _ = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
                                                       self.targetQs_, self.targetQs_selector)
             neg_reward=tf.constant(reward_negative,dtype=tf.float32, shape=(args.batch_size,))
             qloss_negative=0
             for i in range(self.neg):
                 negative=tf.gather(self.negative_actions, i, axis=1)
-
-                qloss_negative+=trfl.double_qlearning(self.output1, negative, neg_reward,
+                if self.cql:
+                    qloss_negative+=trfl.double_cql(self.output1, negative, neg_reward,
+                                                                          self.discount, self.targetQ_current_,
+                                                                          self.targetQ_current_selector)[0]
+                else:
+                    qloss_negative+=trfl.double_qlearning(self.output1, negative, neg_reward,
                                                                           self.discount, self.targetQ_current_,
                                                                           self.targetQ_current_selector)[0]
 
@@ -272,8 +267,6 @@ class QNetwork:
 
             q_indexed_positive = tf.stop_gradient(indexing_ops.batched_index(self.output1, self.actions))
             q_indexed_negative = 0
-            
-           
             for i in range(self.neg):
                 negative=tf.gather(self.negative_actions, i, axis=1)
                 q_indexed_negative+=tf.stop_gradient(indexing_ops.batched_index(self.output1, negative))
@@ -285,36 +278,21 @@ class QNetwork:
 
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
-             ### adding CQL loss
-            cql_loss=0
-            if self.use_CQL:
-                # logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                # cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
-              
-                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
-                cql_loss = tf.reduce_mean(logsumexp_qvals - q_indexed_positive_cql)
 
-            ### Incorporating CWL into loss1
-            if self.use_CQL:
-                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+            self.loss1 = tf.reduce_mean(qloss_positive+qloss_negative+ce_loss_pre)
+            self.opt1 = tf.train.AdamOptimizer(learning_rate).minimize(self.loss1)
 
-            else:
-                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
-            
-            self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
-
-            self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
-            self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
+            self.loss2 = tf.reduce_mean(self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
+            self.opt2 = tf.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
 
     def initialize_embeddings(self):
         all_embeddings = dict()
         if self.pretrain == False:
-            with tf.compat.v1.variable_scope(self.name):
-                state_embeddings = tf.Variable(tf.random.normal([self.item_num + 1, self.hidden_size], 0.0, 0.01),
+            with tf.variable_scope(self.name):
+                state_embeddings = tf.Variable(tf.random_normal([self.item_num + 1, self.hidden_size], 0.0, 0.01),
                                            name='state_embeddings')
-                pos_embeddings = tf.Variable(tf.random.normal([self.state_size, self.hidden_size], 0.0, 0.01),
+                pos_embeddings = tf.Variable(tf.random_normal([self.state_size, self.hidden_size], 0.0, 0.01),
                                              name='pos_embeddings')
                 all_embeddings['state_embeddings'] = state_embeddings
                 all_embeddings['pos_embeddings'] = pos_embeddings
@@ -330,10 +308,8 @@ class QNetwork:
         #     print("load!")
         return all_embeddings
 
-def evaluate(sess, datatype='val'):
+def evaluate(sess):
     eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
-    if datatype == 'test':
-        eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_test.df'))
     eval_ids = eval_sessions.session_id.unique()
     groups = eval_sessions.groupby('session_id')
     batch = 100
@@ -400,8 +376,6 @@ def evaluate(sess, datatype='val'):
 
 
 if __name__ == '__main__':
-    tf.compat.v1.disable_eager_execution()
-    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     # Network parameters
     args = parse_args()
 
@@ -416,7 +390,7 @@ if __name__ == '__main__':
     topk=[5,10,15,20]
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
 
-    tf.compat.v1.reset_default_graph()
+    tf.reset_default_graph()
 
     QN_1 = QNetwork(name='QN_1', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
                     state_size=state_size, pretrain=False)
@@ -432,14 +406,13 @@ if __name__ == '__main__':
     # off_eval=args.off_eval
 
     total_step=0
-    with tf.compat.v1.Session() as sess:
+    with tf.Session() as sess:
         # Initialize variables
-        sess.run(tf.compat.v1.global_variables_initializer())
+        sess.run(tf.global_variables_initializer())
         #evaluate(sess)
         num_rows=replay_buffer.shape[0]
         num_batches=int(num_rows/args.batch_size)
         for i in range(args.epoch):
-            print(f"epoch {i+1}")
             for j in range(num_batches):
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
 
@@ -516,8 +489,7 @@ if __name__ == '__main__':
                     total_step += 1
                     if total_step % 200 == 0:
                         print("the loss in %dth batch is: %f" % (total_step, loss))
-                    if total_step % 8000 == 0:
-                        print("\nBeginning evaluation...")
+                    if total_step % 4000 == 0:
                         evaluate(sess)
                 else:
 
@@ -542,16 +514,8 @@ if __name__ == '__main__':
                     total_step += 1
                     if total_step % 200 == 0:
                         print("the loss in %dth batch is: %f" % (total_step, loss))
-                    if total_step % 8000 == 0:
-                        print("\nBeginning evaluation...")
+                    if total_step % 4000 == 0:
                         evaluate(sess)
-        
-        # Training completed
-        print("Training completed...")
-        print("Evaluating test dataset...\n")
-
-        # Evaluate sampled test dataset
-        evaluate(sess, datatype='test')
 
 
 

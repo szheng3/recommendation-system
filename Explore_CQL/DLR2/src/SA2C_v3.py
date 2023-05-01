@@ -9,7 +9,7 @@ from collections import deque
 from utility_v2 import pad_history, calculate_hit, calculate_off
 from NextItNetModules_v2 import *
 from SASRecModules_v2 import *
-from CQL_loss import compute_cql_loss
+#from CQL_loss import compute_cql_loss
 
 import trfl
 from trfl import indexing_ops
@@ -79,7 +79,8 @@ class QNetwork:
         self.lr_2=args.lr_2
         self.CQL_alpha = args.CQL_alpha
         #self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
-        
+        self.conservative_threshold_ph = tf.compat.v1.placeholder(tf.float32, name='conservative_threshold')
+
         if self.CQL_alpha>0: 
             print('Using CQL loss.')
             self.use_CQL = True
@@ -258,6 +259,16 @@ class QNetwork:
             # TRFL double qlearning
             qloss_positive, qlearning_info = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
                                                       self.targetQs_, self.targetQs_selector)
+            
+            
+            #  # Conservative Q-learning loss modification
+            # td_error_positive = qlearning_info.td_error
+            # conservative_td_error_positive = tf.minimum(td_error_positive, self.conservative_threshold_ph)
+            # conservative_qloss_positive = tf.reduce_mean(tf.square(conservative_td_error_positive))
+
+            # qloss_positive = conservative_qloss_positive
+            
+            
             neg_reward=tf.constant(reward_negative,dtype=tf.float32, shape=(args.batch_size,))
             qloss_negative=0
             for i in range(self.neg):
@@ -266,6 +277,10 @@ class QNetwork:
                 qloss_negative+=trfl.double_qlearning(self.output1, negative, neg_reward,
                                                                           self.discount, self.targetQ_current_,
                                                                           self.targetQ_current_selector)[0]
+
+           
+
+
 
             ce_loss_pre = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
             ce_loss_post = tf.multiply(self.ips,ce_loss_pre)
@@ -285,25 +300,29 @@ class QNetwork:
 
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
-             ### adding CQL loss
+             ### adding CQL loss like in the discrete CQL portion of d3rlpy
             cql_loss=0
             if self.use_CQL:
                 # logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
                 # cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
               
                 logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
-                cql_loss = tf.reduce_mean(logsumexp_qvals - q_indexed_positive_cql)
+                #q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
+                #q_index_negative_cql = indexing_ops.batched_index(self.output1, self.actions)
+                
+
+                cql_loss_positive = tf.reduce_mean(logsumexp_qvals - q_indexed_positive)
+                cql_loss_negative = tf.reduce_mean(logsumexp_qvals - q_indexed_negative)
+
 
             ### Incorporating CWL into loss1
             if self.use_CQL:
-                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss_pre) 
 
             else:
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
             
             self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
-
             self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
             self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
