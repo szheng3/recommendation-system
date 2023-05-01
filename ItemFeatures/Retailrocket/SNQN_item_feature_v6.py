@@ -309,10 +309,9 @@ class QNetwork:
             # CHANGES: Add a placeholder for the category IDs
             if self.feature_dim is not None:
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
-                self.lambda_values = tf.compat.v1.placeholder(tf.float32,
-                                                       [None])  # sequence of history, [batchsize,state_size]
+                self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
 
-                self.lambda_values = tf.expand_dims(self.lambda_values, axis=-1)
+                self.lambda_values_expanded = tf.expand_dims(self.lambda_values, axis=-1)
 
                 # CHANGES: Add another fully connected layer to encode the categorical features
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
@@ -329,8 +328,8 @@ class QNetwork:
                 # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
                 # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
                 self.final_score = tf.add(
-                    tf.multiply(self.lambda_values, self.output2),
-                    tf.multiply(tf.subtract(1.0, self.lambda_values), self.phi_prime)
+                    tf.multiply(self.lambda_values_expanded, self.output2),
+                    tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
                 )
 
                 # CHANGES: Provide the final score in the cross-entropy loss
