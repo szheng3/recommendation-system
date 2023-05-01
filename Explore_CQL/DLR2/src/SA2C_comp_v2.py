@@ -79,7 +79,9 @@ class QNetwork:
         self.lr_2=args.lr_2
         self.CQL_alpha = args.CQL_alpha
         #self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
-        
+        self.log_pi = tf.compat.v1.placeholder(tf.float32, [None])
+
+
         if self.CQL_alpha>0: 
             print('Using CQL loss.')
             self.use_CQL = True
@@ -285,26 +287,40 @@ class QNetwork:
 
             ce_loss_post = tf.multiply(advantage, ce_loss_post)
 
+            cql_sampled_qvalues = indexing_ops.batched_index(self.output1, self.cql_sampled_actions)
+            max_cql_sampled_qvalues = tf.reduce_max(cql_sampled_qvalues, axis=1)
+
+            q_selected_action = indexing_ops.batched_index(self.output1, self.actions)
+
+            cql_margin = tf.compat.v1.placeholder(tf.float32, ())
+            cql_loss = tf.reduce_mean(tf.maximum(0.0, cql_margin + max_cql_sampled_qvalues - q_selected_action))
+
+            qloss_positive_cql = qloss_positive + alpha * cql_loss
+            qloss_negative_cql = qloss_negative + alpha * cql_loss
+
+
+
              ### adding CQL loss
             cql_loss=0
             if self.use_CQL:
-                # logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                # cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
-              
-                logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
-                q_indexed_positive_cql = indexing_ops.batched_index(self.output1, self.actions)
-                cql_loss = tf.reduce_mean(logsumexp_qvals - q_indexed_positive_cql)
+                #logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
+                #cql_loss = tf.reduce_mean(logsumexp_qvals) - tf.reduce_mean(q_indexed_positive)
+                # Calculate CQL Loss
+                target_log_pi = tf.reduce_logsumexp(self.output1, axis=1)
+                cql_loss = tf.reduce_mean(target_log_pi - self.log_pi)
+
 
             ### Incorporating CWL into loss1
             if self.use_CQL:
-                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+                #self.loss1 = tf.reduce_mean(input_tensor=qloss_positive + qloss_negative + ce_loss_pre) + self.CQL_alpha * cql_loss
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive_cql + qloss_negative_cql + ce_loss_pre)
+s               elf.loss2 = tf.reduce_mean(input_tensor=self.weight * (qloss_positive_cql + qloss_negative_cql) + ce_loss_post)
 
             else:
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
+                self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
             
-            self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
-
-            self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
+            self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)  
             self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
 
