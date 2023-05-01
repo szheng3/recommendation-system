@@ -103,6 +103,11 @@ if __name__ == '__main__':
 
     # convert original id to paper style id
     item_ids = raw_data['item_id'].unique()
+    item_ids_df = pd.DataFrame({'itemid': item_ids})
+    item_ids_df = item_ids_df.sort_values(by='itemid')
+
+    # Save the DataFrame as a CSV file
+    item_ids_df.to_csv(os.path.join(DATA, f"./item_ids.csv"), index=False)
     item_size = len(item_ids)
     code_to_item = {value: index for index, value in enumerate(item_ids)}
     raw_data['item_id'] = raw_data['item_id'].apply(lambda x: code_to_item[x])
