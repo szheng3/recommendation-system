@@ -83,8 +83,8 @@ def evaluate(sess):
                 reward = reward_buy if is_buy == 1 else reward_click
                 if is_buy==1:
                     total_purchase+=1.0
-                else:
-                    total_clicks+=1.0
+                # else:
+                #     total_clicks+=1.0
                 actions.append(action)
                 rewards.append(reward)
                 history.append(row['item_id'])
@@ -93,15 +93,16 @@ def evaluate(sess):
         sorted_list=np.argsort(prediction)
         calculate_hit(sorted_list,topk,actions,rewards,reward_click,total_reward,hit_clicks,ndcg_clicks,hit_purchase,ndcg_purchase)
     print('#############################################################')
-    print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
+    # print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
+    print('total purchase:%d' % ( total_purchase))
     for i in range(len(topk)):
-        hr_click=hit_clicks[i]/total_clicks
+        # hr_click=hit_clicks[i]/total_clicks
         hr_purchase=hit_purchase[i]/total_purchase
-        ng_click=ndcg_clicks[i]/total_clicks
+        # ng_click=ndcg_clicks[i]/total_clicks
         ng_purchase=ndcg_purchase[i]/total_purchase
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('cumulative reward @ %d: %f' % (topk[i],total_reward[i]))
-        print('clicks hr ndcg @ %d : %f, %f' % (topk[i],hr_click,ng_click))
+        # print('clicks hr ndcg @ %d : %f, %f' % (topk[i],hr_click,ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
 
