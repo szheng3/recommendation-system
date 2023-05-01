@@ -312,7 +312,7 @@ class QNetwork:
                 
 
                 cql_loss_positive = tf.reduce_mean(logsumexp_qvals - q_indexed_positive)
-                cql_loss_negative = tf.reduce(mean(logsumexp_qvals - q_indexed_negative)
+                cql_loss_negative = tf.reduce_mean(logsumexp_qvals - q_indexed_negative)
 
 
             ### Incorporating CWL into loss1
