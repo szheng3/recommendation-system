@@ -310,7 +310,7 @@ class QNetwork:
             if self.feature_dim is not None:
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
                 self.lambda_values = tf.compat.v1.placeholder(tf.float32,
-                                                       [None])  # sequence of history, [batchsize,state_size]
+                                                       [None,1])  # sequence of history, [batchsize,state_size]
 
                 # CHANGES: Add another fully connected layer to encode the categorical features
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
