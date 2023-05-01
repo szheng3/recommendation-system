@@ -53,12 +53,13 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
-
+    parser.add_argument('--cql', default=False,type=bool)
     return parser.parse_args()
 
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, cql=False, name='DQNetwork'):
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
+        tf.compat.v1.disable_eager_execution()
         self.state_size = state_size
         self.learning_rate = learning_rate
         self.hidden_size = hidden_size
@@ -68,7 +69,7 @@ class QNetwork:
         self.weight=args.weight
         self.smooth=args.smooth
         self.clip=args.clip
-        self.cql = cql
+        self.cql = args.cql
         # self.save_file = save_file
         self.model = args.model
         self.is_training = tf.placeholder(tf.bool, shape=())
@@ -212,10 +213,10 @@ class QNetwork:
                 self.seq = normalize(self.seq)
                 self.states_hidden = extract_axis_1(self.seq, self.len_state - 1)
 
-            self.output1 = tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
+            self.output1 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
                                                             activation_fn=None)  # all q-values
 
-            self.output2= tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
+            self.output2= tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
                                                              activation_fn=None, scope="ce-logits")  # all ce logits
 
             # TRFL way
