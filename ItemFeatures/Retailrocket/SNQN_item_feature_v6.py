@@ -4,12 +4,13 @@ import pandas as pd
 import os
 import argparse
 from collections import deque
-from utility import pad_history,calculate_hit
+from utility import pad_history, calculate_hit
 from NextItNetModules import *
 from SASRecModules import *
 
 import trfl
 from trfl import indexing_ops
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Run double q learning.")
@@ -44,71 +45,75 @@ def parse_args():
                         help='Number of filters per filter size (default: 16) (for Caser)')
     parser.add_argument('--filter_sizes', nargs='?', default='[2,3,4]',
                         help='Specify the filter_size (for Caser)')
-    parser.add_argument('--num_heads', default=1, type=int,help='number heads (for SASRec)')
+    parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
-
+    parser.add_argument('--lambda_value', type=float, default=0.8,
+                        help='lambda for the function combining')
 
     return parser.parse_args()
 
 
-
-def evaluate(sess):
-    eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
+def evaluate(sess, item_features_np, feature_dim):
+    eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
     eval_ids = eval_sessions.session_id.unique()
     groups = eval_sessions.groupby('session_id')
     batch = 100
-    evaluated=0
-    total_clicks=0.0
+    evaluated = 0
+    total_clicks = 0.0
     total_purchase = 0.0
     total_reward = [0, 0, 0, 0]
-    hit_clicks=[0,0,0,0]
-    ndcg_clicks=[0,0,0,0]
-    hit_purchase=[0,0,0,0]
-    ndcg_purchase=[0,0,0,0]
-    while evaluated<len(eval_ids):
+    hit_clicks = [0, 0, 0, 0]
+    ndcg_clicks = [0, 0, 0, 0]
+    hit_purchase = [0, 0, 0, 0]
+    ndcg_purchase = [0, 0, 0, 0]
+    while evaluated < len(eval_ids):
         states, len_states, actions, rewards = [], [], [], []
         for i in range(batch):
-            if evaluated==len(eval_ids):
+            if evaluated == len(eval_ids):
                 break
-            id=eval_ids[evaluated]
-            group=groups.get_group(id)
-            history=[]
+            id = eval_ids[evaluated]
+            group = groups.get_group(id)
+            history = []
             for index, row in group.iterrows():
-                state=list(history)
-                len_states.append(state_size if len(state)>=state_size else 1 if len(state)==0 else len(state))
-                state=pad_history(state,state_size,item_num)
+                state = list(history)
+                len_states.append(state_size if len(state) >= state_size else 1 if len(state) == 0 else len(state))
+                state = pad_history(state, state_size, item_num)
                 states.append(state)
-                action=row['item_id']
-                is_buy=row['is_buy']
+                action = row['item_id']
+                is_buy = row['is_buy']
                 reward = reward_buy if is_buy == 1 else reward_click
-                if is_buy==1:
-                    total_purchase+=1.0
+                if is_buy == 1:
+                    total_purchase += 1.0
                 else:
-                    total_clicks+=1.0
+                    total_clicks += 1.0
                 actions.append(action)
                 rewards.append(reward)
                 history.append(row['item_id'])
-            evaluated+=1
-        prediction=sess.run(QN_1.output2, feed_dict={QN_1.inputs: states,QN_1.len_state:len_states,QN_1.is_training:False})
-        sorted_list=np.argsort(prediction)
-        calculate_hit(sorted_list,topk,actions,rewards,reward_click,total_reward,hit_clicks,ndcg_clicks,hit_purchase,ndcg_purchase)
+            evaluated += 1
+        prediction = sess.run(QN_1.final_score,
+                              feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
+                                         QN_1.item_features: item_features_np})
+        sorted_list = np.argsort(prediction)
+        calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
+                      hit_purchase, ndcg_purchase)
     print('#############################################################')
     print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
     for i in range(len(topk)):
-        hr_click=hit_clicks[i]/total_clicks
-        hr_purchase=hit_purchase[i]/total_purchase
-        ng_click=ndcg_clicks[i]/total_clicks
-        ng_purchase=ndcg_purchase[i]/total_purchase
+        hr_click = hit_clicks[i] / total_clicks
+        hr_purchase = hit_purchase[i] / total_purchase
+        ng_click = ndcg_clicks[i] / total_clicks
+        ng_purchase = ndcg_purchase[i] / total_purchase
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print('cumulative reward @ %d: %f' % (topk[i],total_reward[i]))
-        print('clicks hr ndcg @ %d : %f, %f' % (topk[i],hr_click,ng_click))
+        print('cumulative reward @ %d: %f' % (topk[i], total_reward[i]))
+        print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
+    return hit_purchase[0]
 
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, feature_dim=None, name='DQNetwork'):
         tf.compat.v1.disable_eager_execution()
         tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
         self.state_size = state_size
@@ -122,6 +127,7 @@ class QNetwork:
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
         # self.save_file = save_file
         self.name = name
+        self.feature_dim = feature_dim
         with tf.compat.v1.variable_scope(self.name):
             self.all_embeddings = self.initialize_embeddings()
             self.inputs = tf.compat.v1.placeholder(tf.int32,
@@ -298,36 +304,26 @@ class QNetwork:
 
             # item features
             # CHANGES: Add a placeholder for the category IDs
-            self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None)
-            print(self.output2)
-            print("states_hidden:shape",self.states_hidden.shape)
-            print(self.states_hidden)
-            self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num,1])
+            if self.feature_dim is not None:
+                self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
 
-            # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-            #                                                    activation=None)
+                # CHANGES: Add another fully connected layer to encode the categorical features
+                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
+                                                                   activation=None)
+                dot_product = tf.matmul(self.states_hidden,
+                                        tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+                reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
+                self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
+                print("lambda_value", args.lambda_value)
 
+                lambda_value = args.lambda_value
+                self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
 
-            # CHANGES: Add another fully connected layer to encode the categorical features
-            # self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size +1, activation=None)
-
-            # dot_product = tf.matmul(self.states_hidden, tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-
-            # Add the bias term from feature_embedding[:, -1]
-            # self.phi_prime = tf.reshape(dot_product, [-1, 1])
-
-            # CHANGES: Calculate phi'
-            # self.phi_prime = tf.matmul(self.states_hidden, self.feature_embedding, transpose_b=True)
-
-
-            # lambda_value = 0.8
-            # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
-
-            # CHANGES: Provide the final score in the cross-entropy loss
-            # ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
-
-            ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
+                # CHANGES: Provide the final score in the cross-entropy loss
+                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
+            else:
+                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
             self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
@@ -354,6 +350,7 @@ class QNetwork:
         #     print("load!")
         return all_embeddings
 
+
 if __name__ == '__main__':
     # Network parameters
     args = parse_args()
@@ -367,47 +364,49 @@ if __name__ == '__main__':
     item_num = data_statis['item_num'][0]  # total number of items
     reward_click = args.r_click
     reward_buy = args.r_buy
-    reward_negative=args.r_negative
-    topk=[5,10,15,20]
+    reward_negative = args.r_negative
+    topk = [5, 10, 15, 20]
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
 
-    #item features
-    item_features_csv =  os.path.join(data_directory, 'category_item_filter.csv')  # Replace this with the path to your CSV file
+    # item features
+    item_features_csv = os.path.join(data_directory,
+                                     'category_item_filter.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='item_id', inplace=True)
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
     item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
-
     # item_features_np = item_features_df.iloc[:, 1:].values
 
+    # print("feature_dim",feature_dim)
     # item_features_array = item_features_df.values[:, 1:].astype(np.float32)  # Assuming the first column is the itemid
     # padding_row = np.zeros((1, item_features_array.shape[1]), dtype=np.float32)
     # item_features_array = np.vstack((padding_row, item_features_array))
 
-
     tf.compat.v1.reset_default_graph()
 
     QN_1 = QNetwork(name='QN_1', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
     QN_2 = QNetwork(name='QN_2', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False)
+                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
+    # print(replay_buffer.head())
     # saver = tf.train.Saver()
 
-    total_step=0
+    total_step = 0
     with tf.compat.v1.Session() as sess:
         # Initialize variables
         sess.run(tf.compat.v1.global_variables_initializer())
         # evaluate(sess)
-        num_rows=replay_buffer.shape[0]
-        num_batches=int(num_rows/args.batch_size)
+        num_rows = replay_buffer.shape[0]
+        num_batches = int(num_rows / args.batch_size)
         for i in range(args.epoch):
             for j in range(num_batches):
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
+                # print(batch)
 
-                #state = list(batch['state'].values())
+                # state = list(batch['state'].values())
 
                 next_state = list(batch['next_state'].values())
                 len_next_state = list(batch['len_next_states'].values())
@@ -422,11 +421,11 @@ if __name__ == '__main__':
                 target_Qs = sess.run(target_QN.output1,
                                      feed_dict={target_QN.inputs: next_state,
                                                 target_QN.len_state: len_next_state,
-                                                target_QN.is_training:True})
+                                                target_QN.is_training: True})
                 target_Qs_selector = sess.run(mainQN.output1,
                                               feed_dict={mainQN.inputs: next_state,
                                                          mainQN.len_state: len_next_state,
-                                                         mainQN.is_training:True})
+                                                         mainQN.is_training: True})
                 # Set target_Qs to 0 for states where episode ends
                 is_done = list(batch['is_done'].values())
                 for index in range(target_Qs.shape[0]):
@@ -438,29 +437,30 @@ if __name__ == '__main__':
                 target_Q_current = sess.run(target_QN.output1,
                                             feed_dict={target_QN.inputs: state,
                                                        target_QN.len_state: len_state,
-                                                       target_QN.is_training:True})
+                                                       target_QN.is_training: True})
                 target_Q__current_selector = sess.run(mainQN.output1,
                                                       feed_dict={mainQN.inputs: state,
                                                                  mainQN.len_state: len_state,
-                                                                 mainQN.is_training:True})
+                                                                 mainQN.is_training: True})
                 action = list(batch['action'].values())
-                negative=[]
+                negative = []
 
                 for index in range(target_Qs.shape[0]):
-                    negative_list=[]
+                    negative_list = []
                     for i in range(args.neg):
-                        neg=np.random.randint(item_num)
-                        while neg==action[index]:
+                        neg = np.random.randint(item_num)
+                        while neg == action[index]:
                             neg = np.random.randint(item_num)
                         negative_list.append(neg)
                     negative.append(negative_list)
 
-                is_buy=list(batch['is_buy'].values())
-                reward=[]
+                is_buy = list(batch['is_buy'].values())
+                reward = []
                 for k in range(len(is_buy)):
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
-                print("item_features_np",item_features_np.shape)
+                # print("targetQs_",target_Qs.shape)
+                # print("item_features_np",item_features_np.shape)
                 loss, _ = sess.run([mainQN.loss, mainQN.opt],
                                    feed_dict={mainQN.inputs: state,
                                               mainQN.len_state: len_state,
@@ -469,14 +469,14 @@ if __name__ == '__main__':
                                               mainQN.discount: discount,
                                               mainQN.actions: action,
                                               mainQN.targetQs_selector: target_Qs_selector,
-                                              mainQN.negative_actions:negative,
-                                              mainQN.targetQ_current_:target_Q_current,
-                                              mainQN.targetQ_current_selector:target_Q__current_selector,
-                                              mainQN.is_training:True,
+                                              mainQN.negative_actions: negative,
+                                              mainQN.targetQ_current_: target_Q_current,
+                                              mainQN.targetQ_current_selector: target_Q__current_selector,
+                                              mainQN.is_training: True,
                                               mainQN.item_features: item_features_np,
                                               })
                 total_step += 1
                 if total_step % 200 == 0:
                     print("the loss in %dth batch is: %f" % (total_step, loss))
                 if total_step % 4000 == 0:
-                    evaluate(sess)
+                    evaluate(sess, item_features_np, feature_dim)
