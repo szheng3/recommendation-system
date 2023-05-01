@@ -93,7 +93,7 @@ def evaluate(sess, item_features_np):
                 history.append(row['item_id'])
             evaluated += 1
         # lambda_values = [x / state_size for x in len_states]
-        lambda_values = [(x / state_size) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+        lambda_values = [(x / state_size) if (x / state_size) < 0.3 else 1.0 for x in len_states]
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
                                          QN_1.item_features: item_features_np, QN_1.lambda_values: lambda_values})
