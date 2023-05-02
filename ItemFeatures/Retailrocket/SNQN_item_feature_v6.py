@@ -53,6 +53,8 @@ def parse_args():
 
     return parser.parse_args()
 
+def cal_lambda(len_state):
+    return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
 
 def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
@@ -93,7 +95,7 @@ def evaluate(sess, item_features_np):
                 history.append(row['item_id'])
             evaluated += 1
         # lambda_values = [x / state_size for x in len_states]
-        lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.2 else 1.0 for x in len_states]
+        lambda_values = cal_lambda(len_states)
         # lambda_values = [ 1.0 for x in len_states]
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
@@ -378,14 +380,18 @@ if __name__ == '__main__':
     reward_buy = args.r_buy
     reward_negative = args.r_negative
     topk = [5, 10, 15, 20]
+
+
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
+
+
 
     # item features
     item_features_csv = os.path.join(data_directory,
                                      'category_item_filter.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='item_id', inplace=True)
-    item_features_df=item_features_df[['item_id','popularity']]
+    item_features_df = item_features_df[['item_id', 'popularity']]
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
     item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
@@ -474,7 +480,7 @@ if __name__ == '__main__':
                 discount = [args.discount] * len(action)
 
                 # lambda_values=[x/state_size for x in len_state]
-                lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+                lambda_values = cal_lambda(len_state)
                 # lambda_values = [ 1.0 for x in len_state]
 
                 # print("item_features_np",item_features_np.shape)
