@@ -85,7 +85,8 @@ $$ HR = \frac{C}{T}$$
 |SASRec-SNQN||||||||
 </td></tr> </table>
 
-#### With CQL Loss
+#### With CQL Loss 
+(For SASRec-SA2C, alpha=1.0)
 
 <table>
 <tr><th> Clicks </th>
