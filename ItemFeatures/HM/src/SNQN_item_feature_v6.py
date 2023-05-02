@@ -102,15 +102,15 @@ def evaluate(sess, item_features_np):
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
     print('#############################################################')
-    print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
+    print(' total purchase:%d' % ( total_purchase))
     for i in range(len(topk)):
-        hr_click = hit_clicks[i] / total_clicks
+        # hr_click = hit_clicks[i] / total_clicks
         hr_purchase = hit_purchase[i] / total_purchase
-        ng_click = ndcg_clicks[i] / total_clicks
+        # ng_click = ndcg_clicks[i] / total_clicks
         ng_purchase = ndcg_purchase[i] / total_purchase
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('cumulative reward @ %d: %f' % (topk[i], total_reward[i]))
-        print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
+        # print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
 
@@ -382,9 +382,11 @@ if __name__ == '__main__':
 
     # item features
     item_features_csv = os.path.join(data_directory,
-                                     'category_item_filter.csv')  # Replace this with the path to your CSV file
+                                     'item_ids.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
-    item_features_df.sort_values(by='item_id', inplace=True)
+    item_features_df.set_index('new_id', inplace=True)
+    item_features_df.sort_values(by='new_id', inplace=True)
+
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
     item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
