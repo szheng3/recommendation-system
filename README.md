@@ -16,6 +16,14 @@
 Conservative Q-Learning (CQL) algorithm is a SAC-based data-driven deep reinforcement learning algorithm, which achieves state-of-the-art performance in offline RL problems. CQL mitigates overestimation error by minimizing action-values under the current policy and maximizing values under the data distribution, enforcing a conservative policy update by incorporating a penalty term based on the estimation of the expected maximum action value under the current policy. As a result, the CQL loss encourages the agent to explore more efficiently by contrasting its Q-values against the Q-values of other actions that are not in the dataset. Discrete CQL, as implemented in d3rlpy, applies the same principles to discrete action spaces, making it suitable for use with algorithms like DQN.
 
 This loss function is given by:
+.. math::
+
+        L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}
+            \left[\log{\sum_a \exp{Q_{\theta_i}(s_t, a)}}
+             - \mathbb{E}_{a \sim D} \big[Q_{\theta_i}(s_t, a)\big] - \tau\right]
+            + L_\mathrm{SAC}(\theta_i)
+
+
 ```
 CQL_loss = E(s, a) [log (1 + exp(Q(s, a) - Q(s, a') + margin))]
 ```
