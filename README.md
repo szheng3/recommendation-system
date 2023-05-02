@@ -1,6 +1,6 @@
 # Deep RL Recommender System for E-commerce --  Take Home Project for AIPI531
 
-> #### Team Members: Chad Miller, Andrew Bonafede, Shuai Zhuang, Yilun Wu, Bryce Whitney
+> #### Team Members: Chad Miller, Andrew Bonafede, Shuai Zheng, Yilun Wu, Bryce Whitney
 
 ## Content
 - [Conservative Q-Learning](#conservative-q-learning)
