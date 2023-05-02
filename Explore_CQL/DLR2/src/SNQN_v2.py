@@ -259,7 +259,7 @@ class QNetwork:
                 cql_loss_positive = tf.reduce_mean(logsumexp_qvals - qloss_negative)
                 cql_loss_negative = tf.reduce_mean(logsumexp_qvals - qloss_positive)
                 
-                self.loss = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss_pre) 
+                self.loss = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss) 
             else:
             ## End Added by Bryce
                 self.loss = tf.reduce_mean(self.weight*(qloss_positive+qloss_negative)+ce_loss)
