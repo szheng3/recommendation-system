@@ -7,7 +7,7 @@
 - [Dataset Descriptions](#datasets)
 - [Running the Code](#instructions-for-running-the-code)
 - [Evaluation Metrics](#evaluation)
-- [RetailRocket Results](retailrocket-results)
+- [RetailRocket Results](#retailrocket-results)
 - [H&M Results](#hm-results)
 - [Contributions](#contributions)
 - [References](#references)
