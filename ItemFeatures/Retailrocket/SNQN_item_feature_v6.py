@@ -53,8 +53,9 @@ def parse_args():
 
     return parser.parse_args()
 
-# 0.347382
-# def cal_lambda(len_state):
+# total clicks: 118306, total purchase:5291
+# cumulative reward @ 20: 6221.600000
+# purchase hr and ndcg @20 : 0.347382, 0.251757
 #     return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
 
 def cal_lambda(len_state):
@@ -343,7 +344,8 @@ class QNetwork:
             else:
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
-            self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
+            # self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
+            self.loss = tf.reduce_mean(0 + ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
     def initialize_embeddings(self):

@@ -176,7 +176,7 @@ class QNetwork:
 
             ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
-            self.loss = tf.reduce_mean(self.weight*(qloss_positive+qloss_negative)+ce_loss)
+            self.loss = tf.reduce_mean(ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
     def initialize_embeddings(self):
