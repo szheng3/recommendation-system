@@ -79,7 +79,7 @@ def evaluate(sess):
                 state = pad_history(state, state_size, item_num)
                 states.append(state)
                 action = row['item_id']
-                action = id_map[action]
+                # action = id_map[action]
 
                 is_buy = row['is_buy']
                 reward = reward_buy if is_buy == 1 else reward_click
@@ -223,9 +223,9 @@ if __name__ == '__main__':
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
     # saver = tf.train.Saver()
 
-    ids_df = pd.read_csv(os.path.join(data_directory, 'item_ids.csv'))
-    ids_df['new_id'] = range(len(ids_df))
-    id_map = ids_df.set_index('itemid')['new_id'].to_dict()
+    # ids_df = pd.read_csv(os.path.join(data_directory, 'item_ids.csv'))
+    # ids_df['new_id'] = range(len(ids_df))
+    # id_map = ids_df.set_index('itemid')['new_id'].to_dict()
 
     total_step = 0
     with tf.compat.v1.Session() as sess:
@@ -241,7 +241,13 @@ if __name__ == '__main__':
                 # state = list(batch['state'].values())
 
                 next_state = list(batch['next_state'].values())
-                next_state = [[id_map[x] for x in inner_list] for inner_list in next_state]
+                print("next_state")
+                print(next_state)
+                # next_state = [[id_map[x] for x in inner_list] for inner_list in next_state]
+                print("next_state_encoded")
+
+                print(next_state)
+
                 len_next_state = list(batch['len_next_states'].values())
                 # double q learning, pointer is for selecting which network  is target and which is main
                 pointer = np.random.randint(0, 2)
@@ -266,7 +272,7 @@ if __name__ == '__main__':
                         target_Qs[index] = np.zeros([item_num])
 
                 state = list(batch['state'].values())
-                state = [[id_map[x] for x in inner_list] for inner_list in state]
+                # state = [[id_map[x] for x in inner_list] for inner_list in state]
 
                 len_state = list(batch['len_state'].values())
                 target_Q_current = sess.run(target_QN.output1,
@@ -278,7 +284,7 @@ if __name__ == '__main__':
                                                                  mainQN.len_state: len_state,
                                                                  mainQN.is_training: True})
                 action = list(batch['action'].values())
-                action = [id_map[x] for x in action]
+                # action = [id_map[x] for x in action]
 
                 negative = []
 
