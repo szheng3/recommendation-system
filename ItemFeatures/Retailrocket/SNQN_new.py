@@ -193,6 +193,25 @@ class QNetwork:
         return all_embeddings
 
 
+# loss not 0
+# total clicks: 118306, total purchase:5291
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative reward @ 5: 5938.800000
+# clicks hr ndcg @ 5 : 0.169214, 0.132908
+# purchase hr and ndcg @5 : 0.365715, 0.316442
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative reward @ 10: 6915.400000
+# clicks hr ndcg @ 10 : 0.200641, 0.143079
+# purchase hr and ndcg @10 : 0.409752, 0.330774
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative reward @ 15: 7450.800000
+# clicks hr ndcg @ 15 : 0.218873, 0.147908
+# purchase hr and ndcg @15 : 0.429408, 0.335983
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# cumulative reward @ 20: 7836.200000
+# clicks hr ndcg @ 20 : 0.231400, 0.150869
+# purchase hr and ndcg @20 : 0.446229, 0.339971
+
 
 if __name__ == '__main__':
     # Network parameters
