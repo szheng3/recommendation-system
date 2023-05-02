@@ -20,7 +20,7 @@ This loss function is given by:
  $$       L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}
             \left[\log{\sum_a \exp{Q_{\theta_i}(s_t, a)}}
              - \mathbb{E}_{a \sim D} \big[Q_{\theta_i}(s_t, a)\big] - \tau\right]
-            + L_\mathrm{SAC}(\theta_i)
+            + L_\mathrm{SAC}(\theta_i) $$
 
 
 ```
