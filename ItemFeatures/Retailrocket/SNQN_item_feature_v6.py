@@ -54,7 +54,7 @@ def parse_args():
     return parser.parse_args()
 
 def cal_lambda(len_state):
-    return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
+    return [ 1.0 for x in len_state]
 
 def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
