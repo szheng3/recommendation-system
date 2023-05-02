@@ -17,12 +17,6 @@ Conservative Q-Learning (CQL) algorithm is a SAC-based data-driven deep reinforc
 
 This loss function is given by:
 
- $$       L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}
-            \left[\log{\sum_a \exp{Q_{\theta_i}(s_t, a)}}
-             - \mathbb{E}_{a \sim D} \big[Q_{\theta_i}(s_t, a)\big] - \tau\right]
-            + L_\mathrm{SAC}(\theta_i) $$
-
-
 ```
 CQL_loss = E(s, a) [log (1 + exp(Q(s, a) - Q(s, a') + margin))]
 ```
