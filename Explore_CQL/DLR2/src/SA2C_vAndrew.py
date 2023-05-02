@@ -217,7 +217,7 @@ class QNetwork:
                                                             activation=None)  # all q-values
 
             self.output2= tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
-                                                             activation=None, scope="ce-logits")  # all ce logits
+                                                             activation=None)  # all ce logits
 
             # TRFL way
             self.actions = tf.placeholder(tf.int32, [None])
