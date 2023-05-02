@@ -384,7 +384,8 @@ if __name__ == '__main__':
     item_features_csv = os.path.join(data_directory,
                                      'item_ids.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
-    item_features_df.set_index('new_id', inplace=True)
+    item_features_df = item_features_df[['new_id', 'itemid']]
+
     item_features_df.sort_values(by='new_id', inplace=True)
 
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
