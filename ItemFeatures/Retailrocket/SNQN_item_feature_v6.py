@@ -53,13 +53,19 @@ def parse_args():
 
     return parser.parse_args()
 
+# loss able
 # total clicks: 118306, total purchase:5291
 # cumulative reward @ 20: 6221.600000
 # purchase hr and ndcg @20 : 0.347382, 0.251757
 #     return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
+# total clicks: 118306, total purchase:5291
+# cumulative reward @ 20: 5223.800000
+# clicks hr ndcg @ 20 : 0.155901, 0.096843
+# purchase hr and ndcg @20 : 0.290115, 0.201568
+#     return [(x / state_size + 0.5) if (x / state_size) < 0.2 else 1.0 for x in len_state]
 
 def cal_lambda(len_state):
-    return [(x / state_size + 0.5) if (x / state_size) < 0.2 else 1.0 for x in len_state]
+    return [0.5 for x in len_state]
 
 def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
