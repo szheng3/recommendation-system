@@ -241,7 +241,13 @@ if __name__ == '__main__':
                 # state = list(batch['state'].values())
 
                 next_state = list(batch['next_state'].values())
+                print("next_state")
+                print(next_state)
                 next_state = [[id_map[x] for x in inner_list] for inner_list in next_state]
+                print("next_state_encoded")
+
+                print(next_state)
+
                 len_next_state = list(batch['len_next_states'].values())
                 # double q learning, pointer is for selecting which network  is target and which is main
                 pointer = np.random.randint(0, 2)
