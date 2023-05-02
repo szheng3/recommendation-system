@@ -106,7 +106,7 @@ if __name__ == '__main__':
     code_to_item = {value: index for index, value in enumerate(item_ids)}
 
     item_ids_df = pd.DataFrame({'itemid': item_ids})
-    item_ids_df['new_id'] = item_ids_df['item_id'].apply(lambda x: code_to_item[x])
+    item_ids_df['new_id'] = item_ids_df['itemid'].apply(lambda x: code_to_item[x])
     item_ids_df = item_ids_df.sort_values(by='new_id')
     item_ids_df.to_csv(os.path.join(DATA, f"./item_ids.csv"), index=False)
 
