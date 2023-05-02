@@ -26,6 +26,7 @@ where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-valu
 ### RetailRocket
 
 The [RetailRocket Dataset](https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset) contains real world ecommerce data from [RetailRocket](https://retailrocket.net/). The data contains a couple important files. `events.csv` contains data on customer behavior such as when they viewed items, added items to their cart, purchased items, etc. `item_properties.csv`contains properties specific to each item. The data represents a 4.5 month span and contains over 2.75 million events from over 1.4 million unique visitors to the website.
+
 ### H&M
 
 The [H&M Dataset](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data?select=transactions_train.csv) contains real-world purchase history of customers from [H&M](https://www2.hm.com/en_us/index.html). For our purposes, the most import file is `transactions_train.csv` which contains the purchases of each customer. This includes which customer made the purchase, when they made the purchase, and what item they purchased.
@@ -70,9 +71,9 @@ $$ HR = \frac{C}{T}$$
 <tr><td>
 
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
+|----|------|-------|-------|-------|----|-----|-----|-----|
 |SASRec-SA2C|0.2229|0.2395|0.2468|0.2513|0.2833|0.3344|0.3622|0.3812
-|SASRec-SNQN||||||||
+|SASRec-SNQN|0.2178|0.2366|0.2447|0.2497|0.2839|0.3415|0.3722|0.3931
 </td></tr> </table>
 
 <table>
@@ -82,7 +83,7 @@ $$ HR = \frac{C}{T}$$
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|--------|----|-----|-----|-----|
 |SASRec-SA2C|0.5129|0.5264|0.5316|0.5348|0.5903|0.6318|0.6514|0.6648
-|SASRec-SNQN||||||||
+|SASRec-SNQN|0.4717|0.4909|0.4981|0.5020|0.5710|0.6302|0.6572|0.6741
 </td></tr> </table>
 
 #### With CQL Loss 
