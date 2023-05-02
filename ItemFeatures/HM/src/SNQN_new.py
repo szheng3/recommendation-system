@@ -241,7 +241,7 @@ if __name__ == '__main__':
                 # state = list(batch['state'].values())
 
                 next_state = list(batch['next_state'].values())
-                next_state = [id_map[x] for x in next_state]
+                next_state = [[id_map[x] for x in inner_list] for inner_list in next_state]
                 len_next_state = list(batch['len_next_states'].values())
                 # double q learning, pointer is for selecting which network  is target and which is main
                 pointer = np.random.randint(0, 2)
@@ -266,7 +266,7 @@ if __name__ == '__main__':
                         target_Qs[index] = np.zeros([item_num])
 
                 state = list(batch['state'].values())
-                state = [id_map[x] for x in state]
+                state = [[id_map[x] for x in inner_list] for inner_list in state]
 
                 len_state = list(batch['len_state'].values())
                 target_Q_current = sess.run(target_QN.output1,
