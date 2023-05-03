@@ -403,7 +403,7 @@ if __name__ == '__main__':
                                      'rc_item_features.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='item_id', inplace=True)
-    # item_features_df = item_features_df[['item_id', 'popularity']]
+    item_features_df = item_features_df[['item_id', 'category_id', 'most_frequent_property', 'popularity_weekly']] # only keep the average weekly popularity
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
     item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
