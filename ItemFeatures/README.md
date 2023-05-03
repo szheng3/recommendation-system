@@ -7,30 +7,35 @@
 - [Notes](#notes)
 
 ## Item Features
-We added item features mentioned in the HRNN paper with below formula:
+In our project, we combine the SNQN models with item features mentioned in the HRNN paper using the following formula:
 
 <img width="625" alt="CleanShot 2023-05-02 at 23 45 00@2x" src="https://user-images.githubusercontent.com/16725501/235829137-a75a658c-95e1-4d54-9117-feeb746d17c9.png">
 
-code is implemented below located in the SNQN_item_feature.py file
+The implementation of this code can be found in the `SNQN_item_feature.py` file. We create a dense layer for the feature embedding and compute the dot product between the states hidden and the feature embedding:
+
 ```python
-self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
-self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
-
-self.lambda_values_expanded = tf.expand_dims(self.lambda_values, axis=-1)
-
 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                    activation=None)
 dot_product = tf.matmul(self.states_hidden,
                         tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
+```
+We then reshape the dot product and add it to the bias term in the feature embedding to obtain phi_prime:
+```python
+reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
 
+```
+Finally, we compute the final score using the lambda values, the output2 value, and phi_prime:
+```python
 self.final_score = tf.add(
     tf.multiply(self.lambda_values_expanded, self.output2),
     tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
-                )
+)
 ```
+Overall, this implementation allows us to combine the strengths of SNQN models and item features to improve our results.
+
+
 ## Instructions for Running the Code
 **Train SASRec-SNQN on RetailRocket:**
 
