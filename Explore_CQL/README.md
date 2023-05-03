@@ -65,6 +65,8 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 #### With CQL Loss 
 (For SASRec-SA2C, alpha=1.0)
 
+(For SASRec-SNQN, alpha=0.5)
+
 <table>
 <tr><th> Clicks </th>
 <tr><td>
@@ -72,7 +74,7 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|--------|----|-----|-----|-----|
 |SASRec-SA2C|0.2263|0.2428|0.2501|0.2547|0.2879|0.3386|0.3663|0.3857
-|SASRec-SNQN||||||||
+|SASRec-SNQN|0.2131|0.2313|0.2392|0.2442|0.2793|0.3353|0.3653|0.3864
 </td></tr> </table>
 
 <table>
@@ -82,13 +84,13 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|-------|----|-----|-----|-----|
 |SASRec-SA2C|0.5153|0.5291|0.5346|0.5376|0.5961|0.6384|0.6593|0.6721
-|SASRec-SNQN||||||||
+|SASRec-SNQN|0.4478|0.4668|0.4744|0.4784|0.5497|0.6081|0.6368|0.6536
 </td></tr> </table>
 
 ### H&M Results
 
 #### Without CQL Loss
---size= 100000 and 10 epochs
+
 <table>
 <tr><th> Purchase </th>
 <tr><td>
@@ -107,8 +109,8 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|-------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
+|SASRec-SA2C|0.0462|0.0507|0.0530|0.0545|0.0621|0.0759|0.0846|0.0910
+|SASRec-SNQN|0.0556|0.0607|0.0633|0.0652|0.0730|0.0889|0.0987|0.1068
 </td></tr> </table>
 
 ### Notes

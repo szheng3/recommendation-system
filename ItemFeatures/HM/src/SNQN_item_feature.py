@@ -54,6 +54,9 @@ def parse_args():
     return parser.parse_args()
 
 
+def cal_lambda(len_state):
+    return [args.lambda_value for x in len_state]
+
 def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
     eval_ids = eval_sessions.session_id.unique()
@@ -93,7 +96,9 @@ def evaluate(sess, item_features_np):
                 history.append(row['item_id'])
             evaluated += 1
         # lambda_values = [x / state_size for x in len_states]
-        lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.3 else 1.0 for x in len_states]
+        # lambda_values = [(x / state_size + 0.4) if (x / state_size) < 0.3 else 1.0 for x in len_states]
+        lambda_values = cal_lambda(len_states)
+
         # lambda_values = [ 1.0 for x in len_states]
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
@@ -102,7 +107,7 @@ def evaluate(sess, item_features_np):
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
     print('#############################################################')
-    print(' total purchase:%d' % ( total_purchase))
+    print(' total purchase:%d' % (total_purchase))
     for i in range(len(topk)):
         # hr_click = hit_clicks[i] / total_clicks
         hr_purchase = hit_purchase[i] / total_purchase
@@ -306,28 +311,35 @@ class QNetwork:
                                                         self.targetQ_current_selector)[0]
 
             # item features
-            # CHANGES: Add a placeholder for the category IDs
             if self.feature_dim is not None:
+                # Define placeholders for item features and lambda values, which will be fed into the model during training
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
                 self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
 
+                # Expand the dimensions of lambda_values to be used in further calculations
                 self.lambda_values_expanded = tf.expand_dims(self.lambda_values, axis=-1)
 
-                # CHANGES: Add another fully connected layer to encode the categorical features
+                # Apply a dense (fully connected) layer to the item features with 'self.hidden_size + 1' number of units, without any activation function
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                    activation=None)
+
+                # Calculate the dot product between the hidden states of the model and the transposed feature embedding (excluding the last column)
                 dot_product = tf.matmul(self.states_hidden,
                                         tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+
+                # Reshape the dot_product to have a shape of (-1, item_num)
                 reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
+                # Calculate phi_prime by adding the reshaped_dot_product and the last column of feature_embedding
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
 
+                # Calculate the final_score by combining output2 and phi_prime using the expanded lambda_values
                 self.final_score = tf.add(
                     tf.multiply(self.lambda_values_expanded, self.output2),
                     tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
                 )
 
-                # CHANGES: Provide the final score in the cross-entropy loss
+                # Compute the cross-entropy loss between the predicted final_score and the true actions
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
             else:
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
@@ -470,7 +482,9 @@ if __name__ == '__main__':
                 discount = [args.discount] * len(action)
 
                 # lambda_values=[x/state_size for x in len_state]
-                lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+                # lambda_values = [(x / state_size + 0.4) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+                lambda_values = cal_lambda(len_state)
+
                 # lambda_values = [ 1.0 for x in len_state]
 
                 # print("item_features_np",item_features_np.shape)

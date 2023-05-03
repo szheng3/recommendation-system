@@ -30,8 +30,6 @@ Please see [README.md](https://github.com/szheng3/recommendation-system/blob/mai
 ### Item Features
 Please see [README.md](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/README.md) for instructions on how to run our Item Features trained recommenders. The associated code can be found [here](https://github.com/szheng3/recommendation-system/tree/main/ItemFeatures)
 
-
-
 ## Datasets
 
 ### RetailRocket
@@ -81,16 +79,16 @@ $$ HR = \frac{C}{T}$$
 
 Chad Miller:
 
-Shuai Zheng:
+Shuai Zheng: worked on the item features of our project, combining SNQN with item features in the `SNQN_item_features.py` file for both RetailRocket and HM datasets, and creating a version of SNQN without item features in the `SNQN_new.py` file. I also updated a README file specifically for the item features and coded the main notebook with two new files, `HM_SNQN_ITEM_FEATURE.ipynb` and `RC_SNQN_ITEM_FEATURE.ipynb`, to run the item features. Additionally, I created a new notebook, `process_RC.ipynb`, to handle category item features and updated `gen_replay_buffer.py` in H&M datasets to get `item_ids.csv`.
 
-Andrew Bonafede:
+Andrew Bonafede: Provided initial implementation of CQL-Loss for SASRec-SA2C model by modifying source code in TRFL package: driver found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/notebooks/SA2C_Alt_Recommender.ipynb), model found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/archive/SA2C_vAndrew.py), modified source code found [here](https://github.com/abonafede/trfl/blob/master/trfl/action_value_ops.py). Aided in implementing SNQN CQL-Loss found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/SNQN_v2.py). Trained this model on RetailRocket Dataset and added results found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/SNQN_Recommender.ipynb).
 
 Yilun Wu:
 
-Bryce Whitney:
-
+Bryce Whitney: Worked on the implementation of CQL-Loss for the SASRec-SNQN model found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/SNQN_v2.py). I made additional alterations to the source code to make it compatiable with the H&M dataset, which can be found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/SNQN_v2_HM.py). I trained and evaluated the SASRec-SNQN model on the H&M dataset and added the results found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/HM_SNQN_Recommender.ipynb).
 
 ## References
+
 1. Kumar et al., Conservative Q-Learning for Offline Reinforcement Learning, arXiv Aug 2020. (https://arxiv.org/pdf/2006.04779.pdf)
 2. Xin Xin et al.,Supervised Advantage Actor-Critic for Recommender Systems, arXiv Nov 2021. (https://arxiv.org/abs/2111.03474)
 3. Yifei Ma et al.,Temporal-Contextual Recommendation in Real-Time, Amazon Aug 2020. (https://assets.amazon.science/96/71/d1f25754497681133c7aa2b7eb05/temporal-contextual-recommendation-in-real-time.pdf)
