@@ -38,21 +38,15 @@ Overall, this implementation allows us to combine the strengths of SNQN models a
 
 
 ## Instructions for Running the Code
-**Train SASRec-SNQN on RetailRocket:**
-
-Open `/DRL2/SA2C_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SNQN with item features on RetailRocket:**
 
-Open `/DRL2/SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `RC_SNQN_ITEM_FEATURE.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without item features. Evaluation Metrics can be found below.
 
-**Train SASRec-SA2C on HM:**
-
-Open `/DRL2/HM_SA2C_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SNQN on HM:**
 
-Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `HM_SNQN_ITEM_FEATURE.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without item features. Evaluation Metrics can be found below.
 
 ### RetailRocket Results
 
