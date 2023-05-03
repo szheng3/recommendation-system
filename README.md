@@ -158,6 +158,16 @@ $$ HR = \frac{C}{T}$$
 
 ## Contributions
 
+Chad Miller:
+
+Shaui Zheng:
+
+Andrew Bonafede:
+
+Yilun Wu:
+
+Bryce Whitney:
+
 
 ## References
 1. Kumar et al., Conservative Q-Learning for Offline Reinforcement Learning, arXiv Aug 2020. (https://arxiv.org/pdf/2006.04779.pdf)
