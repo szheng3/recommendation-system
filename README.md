@@ -30,8 +30,6 @@ Please see [README.md](https://github.com/szheng3/recommendation-system/blob/mai
 ### Item Features
 Please see [README.md](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/README.md) for instructions on how to run our Item Features trained recommenders. The associated code can be found [here](https://github.com/szheng3/recommendation-system/tree/main/ItemFeatures)
 
-
-
 ## Datasets
 
 ### RetailRocket
