@@ -94,4 +94,4 @@ Bryce Whitney:
 3. Yifei Ma et al.,Temporal-Contextual Recommendation in Real-Time, Amazon Aug 2020. (https://assets.amazon.science/96/71/d1f25754497681133c7aa2b7eb05/temporal-contextual-recommendation-in-real-time.pdf)
 4. Retailrocket, “Retailrocket Recommender System Dataset,” Kaggle, 24-Mar-2017. [Online]. Available: https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset. [Accessed: 5-Dec-2022].
 5. H&M Group, “H&M personalized fashion recommendations,” Kaggle, 09-May-2022. [Online]. Available: https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations. [Accessed: 5-Dec-2022].
-6. Generate H&M data such as replay_buffer.df  from https://github.com/architkaila/recommenders_aipi590
+6. Used gen_replay_buffer.py to generate H&M data from https://github.com/architkaila/recommenders_aipi590
