@@ -128,4 +128,4 @@ Open 'DLR2/HM_SNQN_Recommender.ipynb' in Google Colab. This notebook contains al
 </td></tr> </table>
 
 ### Notes
-Please refer to [README.md] (https://github.com/szheng3/recommendation-system/blob/main/README.md) for details on evaluation metrics.
+Please refer to [README.md](https://github.com/szheng3/recommendation-system/blob/main/README.md) for details on evaluation metrics.
