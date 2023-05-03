@@ -54,42 +54,44 @@ Open `HM_SNQN_ITEM_FEATURE.ipynb` in Google Colab. This notebook contains all co
 <tr><th> Clicks </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|-------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
-</td></tr> </table>
+|                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
+|--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
+| SASRec-SNQN with item features(lambda=0)   ||||||||
+| SASRec-SNQN with item features(lambda=0.5) ||||||||
+| SASRec-SNQN with item features(lambda=1.0) ||||||||
+| SASRec-SNQN without item features          ||||||||
+
+</td></tr> 
+</table>
 
 <table>
 <tr><th> Purchase </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
-</td></tr> </table>
+|                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
+|--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
+| SASRec-SNQN with item features(lambda=0)   ||||||||
+| SASRec-SNQN with item features(lambda=0.5) ||||||||
+| SASRec-SNQN with item features(lambda=1.0) ||||||||
+| SASRec-SNQN without item features          ||||||||
+</td></tr> 
+</table>
 
 ### H&M Results
 
-<table>
-<tr><th> Clicks </th>
-<tr><td>
-
-|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
-</td></tr> </table>
 
 <table>
 <tr><th> Purchase </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
+
+|                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
+|--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
+| SASRec-SNQN with item features(lambda=0)   ||||||||
+| SASRec-SNQN with item features(lambda=0.5) ||||||||
+| SASRec-SNQN with item features(lambda=1.0) ||||||||
+| SASRec-SNQN without item features          ||||||||
+
 </td></tr> </table>
 
 ### Notes
