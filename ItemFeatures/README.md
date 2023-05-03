@@ -58,10 +58,10 @@ in 4000th batch
 
 |                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
-| SASRec-SNQN with item features(lambda=0)   ||||||||
-| SASRec-SNQN with item features(lambda=0.5) ||||||||
-| SASRec-SNQN with item features(lambda=1.0) ||||||||
-| SASRec-SNQN without item features          ||||||||
+| SASRec-SNQN with item features(lambda=0)   |0.000010|0.000036|0.000065|0.000077|0.000025|0.000110|0.000220|0.000270
+| SASRec-SNQN with item features(lambda=0.5) |0.007478|0.009129|0.010264|0.011161|0.010963|0.016035|0.020337|0.024132
+| SASRec-SNQN with item features(lambda=1.0) |0.134778|0.144440|0.148851|0.151738|0.170439|0.200320|0.216980|0.229194
+| SASRec-SNQN without item features          |0.134854|0.144680|0.149209|0.152096|0.170372|0.200725|0.217825|0.230039
 
 </td></tr> 
 </table>
@@ -72,10 +72,11 @@ in 4000th batch
 
 |                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
-| SASRec-SNQN with item features(lambda=0)   ||||||||
-| SASRec-SNQN with item features(lambda=0.5) ||||||||
-| SASRec-SNQN with item features(lambda=1.0) ||||||||
-| SASRec-SNQN without item features          ||||||||
+| SASRec-SNQN with item features(lambda=0)   |0.000000|0.000000|0.000053|0.000186|0.000000|0.000000|0.000189|0.000756
+| SASRec-SNQN with item features(lambda=0.5) |0.018287|0.020960|0.022762|0.024020|0.026838|0.034965|0.041769|0.047061
+| SASRec-SNQN with item features(lambda=1.0) |0.311309|0.322806|0.328161|0.331062|0.363636|0.398979|0.419202|0.431487
+| SASRec-SNQN without item features          |0.319153|0.329729|0.335778|0.339388|0.371763|0.404649|0.427518|0.442827
+
 </td></tr> 
 </table>
 
@@ -90,10 +91,10 @@ in 4000th batch
 
 |                                            |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |--------------------------------------------|------|-------|-------|-------|----|-----|-----|-----|
-| SASRec-SNQN with item features(lambda=0)   ||||||||
-| SASRec-SNQN with item features(lambda=0.5) ||||||||
-| SASRec-SNQN with item features(lambda=1.0) ||||||||
-| SASRec-SNQN without item features          ||||||||
+| SASRec-SNQN with item features(lambda=0)   |0.005190|0.006541|0.007508|0.008332|0.007631|0.011830|0.015478|0.018981
+| SASRec-SNQN with item features(lambda=0.5) |0.005127|0.006396|0.007393|0.008213|0.007295|0.011254|0.015046|0.018525
+| SASRec-SNQN with item features(lambda=1.0) |0.005174|0.006336|0.007172|0.007847|0.007655|0.011278|0.014446|0.017301
+| SASRec-SNQN without item features          |0.021093|0.023655|0.025066|0.026047|0.028052|0.036019|0.036019|0.045497
 
 </td></tr> </table>
 
