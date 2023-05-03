@@ -400,7 +400,7 @@ if __name__ == '__main__':
 
     # item features
     item_features_csv = os.path.join(data_directory,
-                                     'category_item_filter_2.csv')  # Replace this with the path to your CSV file
+                                     'category_item_filter.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
     item_features_df.sort_values(by='item_id', inplace=True)
     # item_features_df = item_features_df[['item_id', 'popularity']]
