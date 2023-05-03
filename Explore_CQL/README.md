@@ -88,7 +88,6 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 ### H&M Results
 
 #### Without CQL Loss
-With a size of 100,000 and 10 epochs
 
 <table>
 <tr><th> Purchase </th>
@@ -96,7 +95,7 @@ With a size of 100,000 and 10 epochs
 
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|-------|----|-----|-----|-----|
-|SASRec-SA2C|0.07030|0.0744|0.0766|0.0780|0.0863|0.0991|0.1073|0.1134
+|SASRec-SA2C||||||||
 |SASRec-SNQN||||||||
 </td></tr> </table>
 
