@@ -88,7 +88,7 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 ### H&M Results
 
 #### Without CQL Loss
---size= 20000 and 10 epochs
+--size= 100000 and 10 epochs
 <table>
 <tr><th> Purchase </th>
 <tr><td>
