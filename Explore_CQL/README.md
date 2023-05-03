@@ -1,6 +1,7 @@
 # Deep Reinforcement Learned Recommenders with CQL
 ## Content
 - [Conservative Q-Learning](#conservative-q-learning)
+- [Our Approach](#our-approach)
 - [Running the Code](#instructions-for-running-the-code)
 - [RetailRocket Results](#retailrocket-results)
 - [H&M Results](#hm-results)
@@ -16,23 +17,26 @@ CQL_loss = E(s, a) [log (1 + exp(Q(s, a) - Q(s, a') + margin))]
 ```
 where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-value for the state-action pair, and Q(s, a') is the Q-value for the state and other actions. 
 
+## Our Approach
+
+
 ## Instructions for Running the Code
 
 **Train SASRec-SA2C on RetailRocket:**
 
-Open 'DLR2/SA2C_Recommender.ipynb' in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `/DRL2/SA2C_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SNQN on RetailRocket:**
 
-Open 'DLR2/SNQN_Recommender.ipynb' in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `/DRL2/SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SA2C on HM:**
 
-Open 'DLR2/HM_SA2C_Recommender.ipynb' in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `/DRL2/HM_SA2C_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SNQN on HM:**
 
-Open 'DLR2/HM_SNQN_Recommender.ipynb' in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 ### RetailRocket Results
 

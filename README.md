@@ -3,13 +3,34 @@
 > #### Team Members: Chad Miller, Andrew Bonafede, Shuai Zheng, Yilun Wu, Bryce Whitney
 
 ## Content
-- [About the Project](#about-the-project)
+- [About the Project](#overview)
 - [Dataset Descriptions](#datasets)
 - [Evaluation Metrics](#evaluation)
 - [Contributions](#contributions)
 - [References](#references)
 
-## About the Project 
+## Overview
+
+Objectives:
+
+1.Train different session (contextual, sequential) based product recommendation recommenders
+for E-commerce use cases and compare the performances of the recommenders.
+2.Include the CQL loss to improve the model performance.
+3.Include item and/or user features as side information for cold items/users.
+
+Requirements:
+
+In the deliverables and experiments, one of the recommenders needs to be a Deep RL
+recommender [DRL2] and at least two different datasets are used for training/testing. Also, at
+least two offline evaluation metrics are used for benchmarking
+
+### CQL
+Please see [README.md](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/README.md) for instructions on how to run our CQL Loss trained recommenders. The associated code can be found [here](https://github.com/szheng3/recommendation-system/tree/main/Explore_CQL)
+
+### Item Features
+Please see [README.md](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/README.md) for instructions on how to run our Item Features trained recommenders. The associated code can be found [here](https://github.com/szheng3/recommendation-system/tree/main/ItemFeatures)
+
+
 
 ## Datasets
 
@@ -17,13 +38,13 @@
 
 The [RetailRocket Dataset](https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset) contains real world ecommerce data from [RetailRocket](https://retailrocket.net/). The data contains a couple important files. `events.csv` contains data on customer behavior such as when they viewed items, added items to their cart, purchased items, etc. `item_properties.csv`contains properties specific to each item. The data represents a 4.5 month span and contains over 2.75 million events from over 1.4 million unique visitors to the website.
 
-### EDA for RetailRocket Dataset
+#### EDA
 
 ### H&M
 
 The [H&M Dataset](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data?select=transactions_train.csv) contains real-world purchase history of customers from [H&M](https://www2.hm.com/en_us/index.html). For our purposes, the most import file is `transactions_train.csv` which contains the purchases of each customer. This includes which customer made the purchase, when they made the purchase, and what item they purchased.
 
-### EDA for H&M Dataset
+#### EDA
 
 ## Evaluation
 
