@@ -562,9 +562,9 @@ if __name__ == '__main__':
                     total_step += 1
                     if total_step % 200 == 0:
                         print("the loss in %dth batch is: %f" % (total_step, loss))
-                    #if total_step % 8000 == 0:
-                    #    print("\nBeginning evaluation...")
-                    #    evaluate(sess)
+                    if total_step % 8000 == 0:
+                        print("\nBeginning evaluation...")
+                        evaluate(sess)
         
         # Training completed
         print("Training completed...")
