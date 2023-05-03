@@ -1,4 +1,4 @@
-# Deep RL Recommender System for E-commerce --  Take Home Project for AIPI531
+# Deep Reinforcement Learning Recommender System for E-commerce --  Take Home Project for AIPI531
 
 > #### Team Members: Chad Miller, Andrew Bonafede, Shuai Zheng, Yilun Wu, Bryce Whitney
 
@@ -79,7 +79,7 @@ $$ HR = \frac{C}{T}$$
 
 Chad Miller:
 
-Shaui Zheng:
+Shuai Zheng:
 
 Andrew Bonafede:
 
@@ -91,4 +91,7 @@ Bryce Whitney:
 ## References
 1. Kumar et al., Conservative Q-Learning for Offline Reinforcement Learning, arXiv Aug 2020. (https://arxiv.org/pdf/2006.04779.pdf)
 2. Xin Xin et al.,Supervised Advantage Actor-Critic for Recommender Systems, arXiv Nov 2021. (https://arxiv.org/abs/2111.03474)
-3. Yifei Ma et al.,Temporal-Contextual Recommendation in Real-Time. (https://assets.amazon.science/96/71/d1f25754497681133c7aa2b7eb05/temporal-contextual-recommendation-in-real-time.pdf)
+3. Yifei Ma et al.,Temporal-Contextual Recommendation in Real-Time, Amazon Aug 2020. (https://assets.amazon.science/96/71/d1f25754497681133c7aa2b7eb05/temporal-contextual-recommendation-in-real-time.pdf)
+4. Retailrocket, “Retailrocket Recommender System Dataset,” Kaggle, 24-Mar-2017. [Online]. Available: https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset. [Accessed: 5-Dec-2022].
+5. H&M Group, “H&M personalized fashion recommendations,” Kaggle, 09-May-2022. [Online]. Available: https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations. [Accessed: 5-Dec-2022].
+6. Used gen_replay_buffer.py to generate H&M data from https://github.com/architkaila/recommenders_aipi590

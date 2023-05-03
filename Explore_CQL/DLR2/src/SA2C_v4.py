@@ -9,8 +9,7 @@ from collections import deque
 from utility_v2 import pad_history, calculate_hit, calculate_off
 from NextItNetModules_v2 import *
 from SASRecModules_v2 import *
-#from CQL_loss import compute_cql_loss
-from CQL_d3rlpy_version import *
+from CQL_loss import compute_cql_loss
 import trfl
 from trfl import indexing_ops
 from d3rlpy.algos import CQL
@@ -307,7 +306,7 @@ class QNetwork:
 
             cql_discrete = DiscreteCQL(self)
 
-            cql_loss_from_dcql = cql_discrete.
+          
 
 
              ### adding CQL loss like in the discrete CQL portion of d3rlpy

@@ -398,17 +398,24 @@ def evaluate(sess, datatype='val'):
     print('#############################################################')
     print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
     for i in range(len(topk)):
-        hr_click=hit_clicks[i]/total_clicks
+        if total_clicks>0.0:
+            hr_click=hit_clicks[i]/total_clicks
+        else: 
+            hr_click=0
         hr_purchase=hit_purchase[i]/total_purchase
-        ng_click=ndcg_clicks[i]/total_clicks
+        if total_clicks>0:
+            ng_click=ndcg_clicks[i]/total_clicks
+        else: 
+            ng_click=0
         ng_purchase=ndcg_purchase[i]/total_purchase
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('cumulative reward @ %d: %f' % (topk[i],total_reward[i]))
         print('clicks hr ndcg @ %d : %f, %f' % (topk[i],hr_click,ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
-    off_click_ng=off_click_ng[0]/off_prob_click[0]
-    off_purchase_ng=off_purchase_ng[0]/off_prob_purchase[0]
-    print('off-line corrected evaluation (click_ng,purchase_ng)@10: %f, %f' % (off_click_ng, off_purchase_ng))
+    if off_prob_click[0] >0 and off_prob_purchase[0]>0:
+        off_click_ng=off_click_ng[0]/off_prob_click[0]
+        off_purchase_ng=off_purchase_ng[0]/off_prob_purchase[0]
+        print('off-line corrected evaluation (click_ng,purchase_ng)@10: %f, %f' % (off_click_ng, off_purchase_ng))
     print('#############################################################')
 
 
@@ -555,9 +562,9 @@ if __name__ == '__main__':
                     total_step += 1
                     if total_step % 200 == 0:
                         print("the loss in %dth batch is: %f" % (total_step, loss))
-                    #if total_step % 8000 == 0:
-                    #    print("\nBeginning evaluation...")
-                    #    evaluate(sess)
+                    if total_step % 8000 == 0:
+                        print("\nBeginning evaluation...")
+                        evaluate(sess)
         
         # Training completed
         print("Training completed...")
