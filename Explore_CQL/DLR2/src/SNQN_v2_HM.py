@@ -287,8 +287,13 @@ class QNetwork:
         #     print("load!")
         return all_embeddings
 
-def evaluate(sess):
-    eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
+def evaluate(sess, datatype='val', eval_batch_size=100):
+    batch = eval_batch_size
+    print(f'\nStart evaluation with batch size {batch}')
+    if datatype == 'test':
+        eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_test.df'))
+    else:
+        eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
     eval_ids = eval_sessions.session_id.unique()
     groups = eval_sessions.groupby('session_id')
     batch = 100
@@ -367,11 +372,17 @@ if __name__ == '__main__':
     with tf.compat.v1.Session() as sess:
         # Initialize variables
         sess.run(tf.compat.v1.global_variables_initializer())
-        evaluate(sess)
+        # evaluate(sess)
         num_rows=replay_buffer.shape[0]
         num_batches=int(num_rows/args.batch_size)
-        for i in range(args.epoch):
+        print()
+        print("********************* Training Started *********************")
+        for epoch in range(args.epoch):
+            print()
+            print(f'Starting Epoch: {epoch+1}')
+            print(f'Number of batches: {num_batches}')
             for j in range(num_batches):
+                total_step=0
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
 
                 #state = list(batch['state'].values())
@@ -442,7 +453,10 @@ if __name__ == '__main__':
                                               mainQN.is_training:True
                                               })
                 total_step += 1
-                if total_step % 200 == 0:
-                    print("the loss in %dth batch is: %f" % (total_step, loss))
-                if total_step % 4000 == 0:
-                    evaluate(sess)
+                if total_step % 100 == 0:
+                    print(f"Training on {total_step} completed.")
+                if (j == (num_batches - 1)):
+                    print(f"Epoch {epoch+1} training completed.")
+                    print(f'The loss after epoch {epoch+1} is: {loss}')
+                #if total_step % args.eval_freq == 0:
+        evaluate(sess, datatype="test")
