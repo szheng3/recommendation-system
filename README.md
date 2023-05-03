@@ -79,7 +79,7 @@ $$ HR = \frac{C}{T}$$
 
 Chad Miller:
 
-Shaui Zheng:
+Shuai Zheng:
 
 Andrew Bonafede:
 
