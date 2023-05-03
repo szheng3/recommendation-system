@@ -53,6 +53,19 @@ def parse_args():
 
     return parser.parse_args()
 
+# loss able
+# total clicks: 118306, total purchase:5291
+# cumulative reward @ 20: 6221.600000
+# purchase hr and ndcg @20 : 0.347382, 0.251757
+#     return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
+# total clicks: 118306, total purchase:5291
+# cumulative reward @ 20: 5223.800000
+# clicks hr ndcg @ 20 : 0.155901, 0.096843
+# purchase hr and ndcg @20 : 0.290115, 0.201568
+#     return [(x / state_size + 0.5) if (x / state_size) < 0.2 else 1.0 for x in len_state]
+
+def cal_lambda(len_state):
+    return [args.lambda_value for x in len_state]
 
 def evaluate(sess, item_features_np):
     eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
@@ -93,7 +106,7 @@ def evaluate(sess, item_features_np):
                 history.append(row['item_id'])
             evaluated += 1
         # lambda_values = [x / state_size for x in len_states]
-        lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.3 else 1.0 for x in len_states]
+        lambda_values = cal_lambda(len_states)
         # lambda_values = [ 1.0 for x in len_states]
         prediction = sess.run(QN_1.final_score,
                               feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
@@ -102,15 +115,15 @@ def evaluate(sess, item_features_np):
         calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
                       hit_purchase, ndcg_purchase)
     print('#############################################################')
-    print(' total purchase:%d' % ( total_purchase))
+    print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
     for i in range(len(topk)):
-        # hr_click = hit_clicks[i] / total_clicks
+        hr_click = hit_clicks[i] / total_clicks
         hr_purchase = hit_purchase[i] / total_purchase
-        # ng_click = ndcg_clicks[i] / total_clicks
+        ng_click = ndcg_clicks[i] / total_clicks
         ng_purchase = ndcg_purchase[i] / total_purchase
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('cumulative reward @ %d: %f' % (topk[i], total_reward[i]))
-        # print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
+        print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
         print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
     print('#############################################################')
 
@@ -338,6 +351,7 @@ class QNetwork:
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
             self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
+            # self.loss = tf.reduce_mean(0 + ce_loss)
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
     def initialize_embeddings(self):
@@ -378,15 +392,18 @@ if __name__ == '__main__':
     reward_buy = args.r_buy
     reward_negative = args.r_negative
     topk = [5, 10, 15, 20]
+
+
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
+
+
 
     # item features
     item_features_csv = os.path.join(data_directory,
-                                     'item_ids.csv')  # Replace this with the path to your CSV file
+                                     'rc_item_features.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
-
-    item_features_df.sort_values(by='itemid', inplace=True)
-
+    item_features_df.sort_values(by='item_id', inplace=True)
+    # item_features_df = item_features_df[['item_id', 'popularity']]
     feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
     item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
 
@@ -475,7 +492,7 @@ if __name__ == '__main__':
                 discount = [args.discount] * len(action)
 
                 # lambda_values=[x/state_size for x in len_state]
-                lambda_values = [(x / state_size+0.4) if (x / state_size) < 0.3 else 1.0 for x in len_state]
+                lambda_values = cal_lambda(len_state)
                 # lambda_values = [ 1.0 for x in len_state]
 
                 # print("item_features_np",item_features_np.shape)
