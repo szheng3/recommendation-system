@@ -64,7 +64,8 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 
 #### With CQL Loss 
 (For SASRec-SA2C, alpha=1.0)
-(For SASRex-SNQN, alpha=0.5)
+
+(For SASRec-SNQN, alpha=0.5)
 
 <table>
 <tr><th> Clicks </th>
