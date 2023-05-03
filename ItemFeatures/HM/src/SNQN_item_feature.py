@@ -382,7 +382,7 @@ if __name__ == '__main__':
 
     # item features
     item_features_csv = os.path.join(data_directory,
-                                     'item_ids.csv')  # Replace this with the path to your CSV file
+                                     'hm_item_features.csv')  # Replace this with the path to your CSV file
     item_features_df = pd.read_csv(item_features_csv)
 
     item_features_df.sort_values(by='itemid', inplace=True)
