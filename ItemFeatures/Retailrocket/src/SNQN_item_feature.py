@@ -319,33 +319,35 @@ class QNetwork:
                                                         self.targetQ_current_selector)[0]
 
             # item features
-            # CHANGES: Add a placeholder for the category IDs
             if self.feature_dim is not None:
+                # Create placeholders for the input tensor data
                 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
                 self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
 
+                # Expand the dimensions of the lambda_values tensor
                 self.lambda_values_expanded = tf.expand_dims(self.lambda_values, axis=-1)
 
-                # CHANGES: Add another fully connected layer to encode the categorical features
+                # Create a dense layer for feature embedding using item_features
                 self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
                                                                    activation=None)
+
+                # Compute dot product between the states_hidden tensor and the feature_embedding tensor
                 dot_product = tf.matmul(self.states_hidden,
                                         tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
+
+                # Reshape the dot_product tensor
                 reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
+                # Compute phi_prime by adding reshaped_dot_product and the last column of feature_embedding
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
-                # print("lambda_value", args.lambda_value)
 
-                # lambda_value = self.lambda_values
-                # one_tensor = tf.ones_like(self.lambda_values)
-                # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
-                # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
+                # Compute the final score using lambda_values_expanded, output2, and phi_prime
                 self.final_score = tf.add(
                     tf.multiply(self.lambda_values_expanded, self.output2),
                     tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
                 )
 
-                # CHANGES: Provide the final score in the cross-entropy loss
+                # Compute the cross-entropy loss using actions and final_score
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
             else:
                 ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
