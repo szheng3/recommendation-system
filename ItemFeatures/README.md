@@ -8,13 +8,10 @@
 
 ## Item Features
 We added item features mentioned in the HRNN paper with below formula:
-$$
-\tilde{\phi}_j(h_k) = (1 - \lambda)\phi_j(h_k) + \lambda\phi'(h_k, f_j), \text{ where } \\
-\phi_j(h_k) = w_j^{\top}h_k + b_j \text{ and } \\
-\phi'(h_k, f_j) = w(f_j)^{\top}h_k + b(f_j)
-$$
 
-code is below in the SNQN_item_feature.py file
+<img width="625" alt="CleanShot 2023-05-02 at 23 45 00@2x" src="https://user-images.githubusercontent.com/16725501/235829137-a75a658c-95e1-4d54-9117-feeb746d17c9.png">
+
+code is implemented below located in the SNQN_item_feature.py file
 ```python
 self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
 self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
