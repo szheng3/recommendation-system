@@ -69,7 +69,7 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 <tr><th> Clicks </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
+|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|--------|----|-----|-----|-----|
 |SASRec-SA2C|0.2263|0.2428|0.2501|0.2547|0.2879|0.3386|0.3663|0.3857
 |SASRec-SNQN||||||||
@@ -79,8 +79,8 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 <tr><th> Purchase </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
+|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|-------|----|-----|-----|-----|
 |SASRec-SA2C|0.5153|0.5291|0.5346|0.5376|0.5961|0.6384|0.6593|0.6721
 |SASRec-SNQN||||||||
 </td></tr> </table>
@@ -88,45 +88,26 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 ### H&M Results
 
 #### Without CQL Loss
-
-<table>
-<tr><th> Clicks </th>
-<tr><td>
-
-|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
-</td></tr> </table>
+With a size of 100,000 and 10 epochs
 
 <table>
 <tr><th> Purchase </th>
 <tr><td>
 
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
+|----|------|-------|-------|-------|----|-----|-----|-----|
+|SASRec-SA2C|0.07030|0.0744|0.0766|0.0780|0.0863|0.0991|0.1073|0.1134
 |SASRec-SNQN||||||||
 </td></tr> </table>
 
 #### With CQL Loss
 
 <table>
-<tr><th> Clicks </th>
-<tr><td>
-
-|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
-|SASRec-SNQN||||||||
-</td></tr> </table>
-
-<table>
 <tr><th> Purchase </th>
 <tr><td>
 
-|    |NDCG@5|NDCG@10|NDCG@15|NADCG@20|HR@5|HR@10|HR@15|HR@20|
-|----|------|-------|-------|--------|----|-----|-----|-----|
+|    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
+|----|------|-------|-------|-------|----|-----|-----|-----|
 |SASRec-SA2C||||||||
 |SASRec-SNQN||||||||
 </td></tr> </table>
