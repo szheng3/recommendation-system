@@ -95,7 +95,7 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 
 |    |NDCG@5|NDCG@10|NDCG@15|NDCG@20|HR@5|HR@10|HR@15|HR@20|
 |----|------|-------|-------|-------|----|-----|-----|-----|
-|SASRec-SA2C||||||||
+|SASRec-SA2C|0.07030|0.0744|0.0766|0.0780|0.0863|0.0991|0.1073|0.1134
 |SASRec-SNQN|0.0619|0.0669|0.0697|0.0714|0.0807|0.0962|0.1067|0.1138
 </td></tr> </table>
 
