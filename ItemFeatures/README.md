@@ -50,6 +50,8 @@ Open `HM_SNQN_ITEM_FEATURE.ipynb` in Google Colab. This notebook contains all co
 
 ### RetailRocket Results
 
+in 4000th batch
+
 <table>
 <tr><th> Clicks </th>
 <tr><td>
@@ -79,6 +81,7 @@ Open `HM_SNQN_ITEM_FEATURE.ipynb` in Google Colab. This notebook contains all co
 
 ### H&M Results
 
+in 4000th batch
 
 <table>
 <tr><th> Purchase </th>
