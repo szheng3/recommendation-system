@@ -87,10 +87,10 @@ Andrew Bonafede: Provided initial implementation of CQL-Loss for SASRec-SA2C mod
 
 Yilun Wu:
 
-Bryce Whitney:
-
+Bryce Whitney: Worked on the implementation of CQL-Loss for the SASRec-SNQN model found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/SNQN_v2.py). I made additional alterations to the source code to make it compatiable with the H&M dataset, which can be found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/src/SNQN_v2_HM.py). I trained and evaluated the SASRec-SNQN model on the H&M dataset and added the results found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DLR2/HM_SNQN_Recommender.ipynb).
 
 ## References
+
 1. Kumar et al., Conservative Q-Learning for Offline Reinforcement Learning, arXiv Aug 2020. (https://arxiv.org/pdf/2006.04779.pdf)
 2. Xin Xin et al.,Supervised Advantage Actor-Critic for Recommender Systems, arXiv Nov 2021. (https://arxiv.org/abs/2111.03474)
 3. Yifei Ma et al.,Temporal-Contextual Recommendation in Real-Time, Amazon Aug 2020. (https://assets.amazon.science/96/71/d1f25754497681133c7aa2b7eb05/temporal-contextual-recommendation-in-real-time.pdf)
