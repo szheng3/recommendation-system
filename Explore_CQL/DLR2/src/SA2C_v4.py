@@ -307,7 +307,7 @@ class QNetwork:
 
             cql_discrete = DiscreteCQL(self)
 
-            cql_loss_from_dcql = cql_discrete.
+          
 
 
              ### adding CQL loss like in the discrete CQL portion of d3rlpy
