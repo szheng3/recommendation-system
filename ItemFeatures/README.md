@@ -93,7 +93,7 @@ in 4000th batch
 | SASRec-SNQN with item features(lambda=0)   ||||||||
 | SASRec-SNQN with item features(lambda=0.5) ||||||||
 | SASRec-SNQN with item features(lambda=1.0) ||||||||
-| SASRec-SNQN without item features          ||||||||
+| SASRec-SNQN without item features          |0.021093|0.023655|0.025066|0.026047|0.028052|0.036019|0.036019|
 
 </td></tr> </table>
 
