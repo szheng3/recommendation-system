@@ -311,7 +311,7 @@ class QNetwork:
 
             ### Incorporating CQL into loss1
             if self.use_CQL:
-                self.loss1 = tf.reduce_mean(input_tensor=(qloss_positive+self.CQL_alpha*cql_loss_positive) + (qloss_negative + self.CQL_alpha*cql_loss_negative) + ce_loss_pre) 
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss_pre) 
 
             else:
                 self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
