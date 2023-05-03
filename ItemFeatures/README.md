@@ -11,6 +11,7 @@ In our project, we combine the SNQN models with item features mentioned in the H
 <p align="center">
 <img src="https://user-images.githubusercontent.com/16725501/235830850-57f03f1c-9d39-4b96-b31e-c5f01e724b69.png" width="70%" height="70%" />
 </p>
+
 The implementation of this code can be found in the `SNQN_item_feature.py` file. We create a dense layer for the feature embedding and compute the dot product between the states hidden and the feature embedding:
 
 ```python
