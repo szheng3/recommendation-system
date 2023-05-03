@@ -39,12 +39,14 @@ Please see [README.md](https://github.com/szheng3/recommendation-system/blob/mai
 The [RetailRocket Dataset](https://www.kaggle.com/datasets/retailrocket/ecommerce-dataset) contains real world ecommerce data from [RetailRocket](https://retailrocket.net/). The data contains a couple important files. `events.csv` contains data on customer behavior such as when they viewed items, added items to their cart, purchased items, etc. `item_properties.csv`contains properties specific to each item. The data represents a 4.5 month span and contains over 2.75 million events from over 1.4 million unique visitors to the website.
 
 #### EDA
+See [`EDA_RetailRocket.ipynb`](EDA_RetailRocket.ipynb)
 
 ### H&M
 
 The [H&M Dataset](https://www.kaggle.com/competitions/h-and-m-personalized-fashion-recommendations/data?select=transactions_train.csv) contains real-world purchase history of customers from [H&M](https://www2.hm.com/en_us/index.html). For our purposes, the most import file is `transactions_train.csv` which contains the purchases of each customer. This includes which customer made the purchase, when they made the purchase, and what item they purchased.
 
 #### EDA
+See [`EDA_HM.ipynb`](EDA_HM.ipynb)
 
 ## Evaluation
 
@@ -65,7 +67,7 @@ $$ DCG = \sum^{K}_{i=1} \frac{G_i}{log_2(i+1)}$$
 Finally we can calculate NDCG by normalizing the dicounted cumulative gain. To do this, we will divide by the *ideal discounted cumulative gain*:
 
 $$ IDCG = \sum^{K}_{i=1} \frac{G^{ideal}_i}{log_2(i+1)}$$
-$$ NDCG = $\frac{DCG}{IDCG}$$
+$$ NDCG = \frac{DCG}{IDCG}$$
 
 A score of 0 means the recommendations are useless, while a score of 1 means they are perfect. If you would like to learn more, here is a great [resource](https://machinelearninginterview.com/topics/machine-learning/ndcg-evaluation-metric-for-recommender-systems/).
 
