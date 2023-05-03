@@ -252,17 +252,17 @@ class QNetwork:
 
             ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
 
-            ## Start Added by Bryce
             if self.use_CQL:
                 logsumexp_qvals = tf.reduce_logsumexp(self.output1, axis=1)
 
-                cql_loss_positive = tf.reduce_mean(logsumexp_qvals - qloss_negative)
-                cql_loss_negative = tf.reduce_mean(logsumexp_qvals - qloss_positive)
-                
-                self.loss = tf.reduce_mean(input_tensor=qloss_positive+self.CQL_alpha*cql_loss_positive + qloss_negative + self.CQL_alpha*cql_loss_negative + ce_loss) 
+                cql_loss_positive = tf.reduce_mean(tf.maximum(logsumexp_qvals - qloss_negative, 0))
+                cql_loss_negative = tf.reduce_mean(tf.maximum(logsumexp_qvals - qloss_positive, 0))
+
+                self.loss = tf.reduce_mean(qloss_positive + self.CQL_alpha * cql_loss_positive +
+                                        qloss_negative + self.CQL_alpha * cql_loss_negative + ce_loss)
             else:
-            ## End Added by Bryce
                 self.loss = tf.reduce_mean(self.weight*(qloss_positive+qloss_negative)+ce_loss)
+
             self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
     def initialize_embeddings(self):
