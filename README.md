@@ -81,7 +81,7 @@ $$ HR = \frac{C}{T}$$
 
 Chad Miller:
 
-Shuai Zheng:
+Shuai Zheng: worked on the item features of our project, combining SNQN with item features in the SNQN_item_features.py file for both RetailRocket and HM datasets, and creating a version of SNQN without item features in the SNQN_new.py file. He also wrote a README file specifically for the item features and coded the main notebook with two new files, HM_SNQN_ITEM_FEATURE.ipynb and RC_SNQN_ITEM_FEATURE.ipynb, to run the item features. Additionally, he created a new notebook, process_RC.ipynb, to handle category item features.
 
 Andrew Bonafede:
 
