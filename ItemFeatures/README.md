@@ -34,7 +34,7 @@ self.final_score = tf.add(
     tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
 )
 ```
-Overall, this implementation allows us to combine the strengths of SNQN models and item features to improve our results.
+Overall, this implementation allows us to combine the strengths of SNQN models and item features.
 
 
 ## Instructions for Running the Code
