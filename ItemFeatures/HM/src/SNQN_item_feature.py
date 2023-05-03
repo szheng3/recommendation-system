@@ -321,12 +321,7 @@ class QNetwork:
                 reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
                 self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
-                # print("lambda_value", args.lambda_value)
 
-                # lambda_value = self.lambda_values
-                # one_tensor = tf.ones_like(self.lambda_values)
-                # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
-                # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
                 self.final_score = tf.add(
                     tf.multiply(self.lambda_values_expanded, self.output2),
                     tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
