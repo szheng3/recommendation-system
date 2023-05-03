@@ -1,4 +1,5 @@
 import trfl
+import tensorflow as tf
 
 
 def compute_cql_loss(target_q_values, policy_q_values):
@@ -6,8 +7,8 @@ def compute_cql_loss(target_q_values, policy_q_values):
     Compute CQL loss.
     
     Args:
-        all_q_values (tf.Tensor): All Q-values for all actions.
-        selected_q_values (tf.Tensor): Q-values for the selected actions from the main network.
+        target_q_values (tf.Tensor): All Q-values for all actions.
+        policy_q_values (tf.Tensor): Q-values for the selected actions from the main network.
         
     
     Returns:

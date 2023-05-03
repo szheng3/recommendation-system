@@ -1,19 +1,21 @@
+import warnings
+warnings.filterwarnings("ignore")
 import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
 import argparse
 from collections import deque
-from utility import pad_history, calculate_hit
-from NextItNetModules import *
-from SASRecModules import *
+from utility_v2 import pad_history, calculate_hit, calculate_off
+from NextItNetModules_v2 import *
+from SASRecModules_v2 import *
+from CQL_loss import compute_cql_loss
 
 import trfl
 from trfl import indexing_ops
 
-
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run double q learning.")
+    parser = argparse.ArgumentParser(description="Run naive double q learning.")
 
     parser.add_argument('--epoch', type=int, default=50,
                         help='Number of max epochs.')
@@ -39,7 +41,13 @@ def parse_args():
                         help='number of negative samples.')
     parser.add_argument('--weight', type=float, default=1.0,
                         help='number of negative samples.')
-    parser.add_argument('--model', type=str, default='GRU',
+    parser.add_argument('--smooth', type=float, default=0.0,
+                        help='smooth factor for off-policy correction,smooth=0 equals no correction')
+    parser.add_argument('--clip', type=float, default=0.0,
+                        help='clip value for advantage')
+    parser.add_argument('--lr_2', type=float, default=0.001,
+                        help='Learning rate.')
+    parser.add_argument('--model', type=str, default='NItNet',
                         help='the base recommendation models, including GRU,Caser,NItNet and SASRec')
     parser.add_argument('--num_filters', type=int, default=16,
                         help='Number of filters per filter size (default: 16) (for Caser)')
@@ -48,113 +56,48 @@ def parse_args():
     parser.add_argument('--num_heads', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--num_blocks', default=1, type=int, help='number heads (for SASRec)')
     parser.add_argument('--dropout_rate', default=0.1, type=float)
-    parser.add_argument('--lambda_value', type=float, default=0.8,
-                        help='lambda for the function combining')
+    parser.add_argument('--CQL_alpha', type=float, default=0.0)
 
     return parser.parse_args()
 
-# loss able
-# total clicks: 118306, total purchase:5291
-# cumulative reward @ 20: 6221.600000
-# purchase hr and ndcg @20 : 0.347382, 0.251757
-#     return [(x / state_size + 0.3) if (x / state_size) < 0.2 else 1.0 for x in len_state]
-# total clicks: 118306, total purchase:5291
-# cumulative reward @ 20: 5223.800000
-# clicks hr ndcg @ 20 : 0.155901, 0.096843
-# purchase hr and ndcg @20 : 0.290115, 0.201568
-#     return [(x / state_size + 0.5) if (x / state_size) < 0.2 else 1.0 for x in len_state]
-
-def cal_lambda(len_state):
-    return [args.lambda_value for x in len_state]
-
-def evaluate(sess, item_features_np):
-    eval_sessions = pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
-    eval_ids = eval_sessions.session_id.unique()
-    groups = eval_sessions.groupby('session_id')
-    batch = 100
-    evaluated = 0
-    total_clicks = 0.0
-    total_purchase = 0.0
-    total_reward = [0, 0, 0, 0]
-    hit_clicks = [0, 0, 0, 0]
-    ndcg_clicks = [0, 0, 0, 0]
-    hit_purchase = [0, 0, 0, 0]
-    ndcg_purchase = [0, 0, 0, 0]
-    while evaluated < len(eval_ids):
-        states, len_states, actions, rewards = [], [], [], []
-
-        for i in range(batch):
-            if evaluated == len(eval_ids):
-                break
-            id = eval_ids[evaluated]
-            group = groups.get_group(id)
-            history = []
-            for index, row in group.iterrows():
-                state = list(history)
-                len_states.append(state_size if len(state) >= state_size else 1 if len(state) == 0 else len(state))
-                state = pad_history(state, state_size, item_num)
-                states.append(state)
-                action = row['item_id']
-                is_buy = row['is_buy']
-                reward = reward_buy if is_buy == 1 else reward_click
-                if is_buy == 1:
-                    total_purchase += 1.0
-                else:
-                    total_clicks += 1.0
-                actions.append(action)
-                rewards.append(reward)
-                history.append(row['item_id'])
-            evaluated += 1
-        # lambda_values = [x / state_size for x in len_states]
-        lambda_values = cal_lambda(len_states)
-        # lambda_values = [ 1.0 for x in len_states]
-        prediction = sess.run(QN_1.final_score,
-                              feed_dict={QN_1.inputs: states, QN_1.len_state: len_states, QN_1.is_training: False,
-                                         QN_1.item_features: item_features_np, QN_1.lambda_values: lambda_values})
-        sorted_list = np.argsort(prediction)
-        calculate_hit(sorted_list, topk, actions, rewards, reward_click, total_reward, hit_clicks, ndcg_clicks,
-                      hit_purchase, ndcg_purchase)
-    print('#############################################################')
-    print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
-    for i in range(len(topk)):
-        hr_click = hit_clicks[i] / total_clicks
-        hr_purchase = hit_purchase[i] / total_purchase
-        ng_click = ndcg_clicks[i] / total_clicks
-        ng_purchase = ndcg_purchase[i] / total_purchase
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print('cumulative reward @ %d: %f' % (topk[i], total_reward[i]))
-        print('clicks hr ndcg @ %d : %f, %f' % (topk[i], hr_click, ng_click))
-        print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
-    print('#############################################################')
-
 
 class QNetwork:
-    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, feature_dim=None, name='DQNetwork'):
-        tf.compat.v1.disable_eager_execution()
-        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    def __init__(self, hidden_size, learning_rate, item_num, state_size, pretrain, name='DQNetwork'):
         self.state_size = state_size
         self.learning_rate = learning_rate
         self.hidden_size = hidden_size
         self.item_num = int(item_num)
         self.pretrain = pretrain
-        self.neg = args.neg
-        self.weight = args.weight
+        self.neg=args.neg
+        self.weight=args.weight
+        self.smooth=args.smooth
+        self.clip=args.clip
+        # self.save_file = save_file
         self.model = args.model
         self.is_training = tf.compat.v1.placeholder(tf.bool, shape=())
-        # self.save_file = save_file
         self.name = name
-        self.feature_dim = feature_dim
+        self.lr_2=args.lr_2
+        self.CQL_alpha = args.CQL_alpha
+        #self.cql_sampled_actions = tf.compat.v1.placeholder(tf.int32, [None, self.num_cql_samples])
+        self.conservative_threshold_ph = tf.compat.v1.placeholder(tf.float32, name='conservative_threshold')
+
+        if self.CQL_alpha>0: 
+            print('Using CQL loss.')
+            self.use_CQL = True
+        else:
+            print('Not using CQL loss')
+            self.use_CQL = False
+
         with tf.compat.v1.variable_scope(self.name):
-            self.all_embeddings = self.initialize_embeddings()
-            self.inputs = tf.compat.v1.placeholder(tf.int32,
-                                                   [None, state_size])  # sequence of history, [batchsize,state_size]
+            self.all_embeddings=self.initialize_embeddings()
+            self.inputs = tf.compat.v1.placeholder(tf.int32, [None, state_size])  # sequence of history, [batchsize,state_size]
             self.len_state = tf.compat.v1.placeholder(tf.int32, [
                 None])  # the length of valid positions, because short sesssions need to be padded
 
             # one_hot_input = tf.one_hot(self.inputs, self.item_num+1)
-            self.input_emb = tf.nn.embedding_lookup(self.all_embeddings['state_embeddings'], self.inputs)
+            self.input_emb = tf.nn.embedding_lookup(params=self.all_embeddings['state_embeddings'], ids=self.inputs)
 
-            if self.model == 'GRU':
+            if self.model=='GRU':
                 gru_out, self.states_hidden = tf.compat.v1.nn.dynamic_rnn(
                     tf.compat.v1.nn.rnn_cell.GRUCell(self.hidden_size),
                     self.input_emb,
@@ -162,7 +105,7 @@ class QNetwork:
                     sequence_length=self.len_state,
                 )
 
-            if self.model == 'Caser':
+            if self.model=='Caser':
                 mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
 
                 self.input_emb *= mask
@@ -180,7 +123,7 @@ class QNetwork:
                         b = tf.Variable(tf.constant(0.1, shape=[num_filters]), name="b")
 
                         conv = tf.nn.conv2d(
-                            self.embedded_chars_expanded,
+                            input=self.embedded_chars_expanded,
                             filters=W,
                             strides=[1, 1, 1, 1],
                             padding="VALID",
@@ -208,7 +151,7 @@ class QNetwork:
                     W = tf.Variable(tf.random.truncated_normal(filter_shape, stddev=0.1), name="W")
                     b = tf.Variable(tf.constant(0.1, shape=[1]), name="b")
                     conv = tf.nn.conv2d(
-                        self.embedded_chars_expanded,
+                        input=self.embedded_chars_expanded,
                         filters=W,
                         strides=[1, 1, 1, 1],
                         padding="VALID",
@@ -220,9 +163,9 @@ class QNetwork:
                 # Add dropout
                 with tf.compat.v1.name_scope("dropout"):
                     self.states_hidden = tf.compat.v1.layers.dropout(self.final,
-                                                                     rate=args.dropout_rate,
-                                                                     training=tf.convert_to_tensor(self.is_training))
-            if self.model == 'NItNet':
+                                                          rate=args.dropout_rate,
+                                                          training=tf.convert_to_tensor(value=self.is_training))
+            if self.model=='NItNet':
 
                 mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
 
@@ -233,8 +176,8 @@ class QNetwork:
                     'kernel_size': 3,
                 }
 
-                context_embedding = tf.nn.embedding_lookup(self.all_embeddings['state_embeddings'],
-                                                           self.inputs)
+                context_embedding = tf.nn.embedding_lookup(params=self.all_embeddings['state_embeddings'],
+                                                           ids=self.inputs)
                 context_embedding *= mask
 
                 dilate_output = context_embedding
@@ -247,17 +190,17 @@ class QNetwork:
 
                 self.states_hidden = extract_axis_1(dilate_output, self.len_state - 1)
 
-            if self.model == 'SASRec':
-                pos_emb = tf.nn.embedding_lookup(self.all_embeddings['pos_embeddings'],
-                                                 tf.tile(tf.expand_dims(tf.range(tf.shape(self.inputs)[1]), 0),
-                                                         [tf.shape(self.inputs)[0], 1]))
+            if self.model=='SASRec':
+                pos_emb = tf.nn.embedding_lookup(params=self.all_embeddings['pos_embeddings'],
+                                                 ids=tf.tile(tf.expand_dims(tf.range(tf.shape(input=self.inputs)[1]), 0),
+                                                         [tf.shape(input=self.inputs)[0], 1]))
                 self.seq = self.input_emb + pos_emb
 
                 mask = tf.expand_dims(tf.cast(tf.not_equal(self.inputs, item_num), dtype=tf.float32), -1)
                 # Dropout
                 self.seq = tf.compat.v1.layers.dropout(self.seq,
-                                                       rate=args.dropout_rate,
-                                                       training=tf.convert_to_tensor(self.is_training))
+                                             rate=args.dropout_rate,
+                                             training=tf.convert_to_tensor(value=self.is_training))
                 self.seq *= mask
 
                 # Build blocks
@@ -283,83 +226,107 @@ class QNetwork:
                 self.seq = normalize(self.seq)
                 self.states_hidden = extract_axis_1(self.seq, self.len_state - 1)
 
-            # self.output1 = tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
-            #                                                 activation_fn=None)  # all q-values
+            self.output1 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
+                                                            activation=None)  # all q-values
 
-            # self.output2= tf.contrib.layers.fully_connected(self.states_hidden, self.item_num,
-            #                                                  activation_fn=None, scope="ce-logits")  # all ce logits
-            self.output1 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None)
-            self.output2 = tf.compat.v1.layers.dense(self.states_hidden, self.item_num, activation=None)
+            self.output2= tf.compat.v1.layers.dense(self.states_hidden, self.item_num,
+                                                             activation=None)  # all ce logits
 
             # TRFL way
             self.actions = tf.compat.v1.placeholder(tf.int32, [None])
 
-            self.negative_actions = tf.compat.v1.placeholder(tf.int32, [None, self.neg])
+            self.negative_actions=tf.compat.v1.placeholder(tf.int32,[None,self.neg])
 
             self.targetQs_ = tf.compat.v1.placeholder(tf.float32, [None, item_num])
             self.targetQs_selector = tf.compat.v1.placeholder(tf.float32, [None,
-                                                                           item_num])  # used for select best action for double q learning
+                                                                 item_num])  # used for select best action for double q learning
             self.reward = tf.compat.v1.placeholder(tf.float32, [None])
             self.discount = tf.compat.v1.placeholder(tf.float32, [None])
 
             self.targetQ_current_ = tf.compat.v1.placeholder(tf.float32, [None, item_num])
             self.targetQ_current_selector = tf.compat.v1.placeholder(tf.float32, [None,
-                                                                                  item_num])  # used for select best action for double q learning
+                                                                 item_num])  # used for select best action for double q learning
+
+            # calculate propensity score
+            ce_logits = tf.stop_gradient(self.output2)
+            target_prob = indexing_ops.batched_index(tf.nn.softmax(ce_logits), self.actions)
+            self.behavior_prob = tf.compat.v1.placeholder(tf.float32, [None], name='behavior_prob')
+            self.ips = tf.math.divide(target_prob, self.behavior_prob)
+            self.ips = tf.clip_by_value(self.ips, 0.1, 10)
+            self.ips = tf.pow(self.ips, self.smooth)
+
 
             # TRFL double qlearning
-            qloss_positive, _ = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
+            qloss_positive, qlearning_info = trfl.double_qlearning(self.output1, self.actions, self.reward, self.discount,
                                                       self.targetQs_, self.targetQs_selector)
-            neg_reward = tf.constant(reward_negative, dtype=tf.float32, shape=(args.batch_size,))
-            qloss_negative = 0
+            
+            
+            #  # Conservative Q-learning loss modification
+            # td_error_positive = qlearning_info.td_error
+            # conservative_td_error_positive = tf.minimum(td_error_positive, self.conservative_threshold_ph)
+            # conservative_qloss_positive = tf.reduce_mean(tf.square(conservative_td_error_positive))
+
+            # qloss_positive = conservative_qloss_positive
+            
+            
+            neg_reward=tf.constant(reward_negative,dtype=tf.float32, shape=(args.batch_size,))
+            qloss_negative=0
             for i in range(self.neg):
-                negative = tf.gather(self.negative_actions, i, axis=1)
+                negative=tf.gather(self.negative_actions, i, axis=1)
 
-                qloss_negative += trfl.double_qlearning(self.output1, negative, neg_reward,
-                                                        self.discount, self.targetQ_current_,
-                                                        self.targetQ_current_selector)[0]
+                qloss_negative+=trfl.double_qlearning(self.output1, negative, neg_reward,
+                                                                          self.discount, self.targetQ_current_,
+                                                                          self.targetQ_current_selector)[0]
 
-            # item features
-            # CHANGES: Add a placeholder for the category IDs
-            if self.feature_dim is not None:
-                self.item_features = tf.compat.v1.placeholder(tf.float32, [None, item_num, self.feature_dim])
-                self.lambda_values = tf.compat.v1.placeholder(tf.float32, [None])
+           
 
-                self.lambda_values_expanded = tf.expand_dims(self.lambda_values, axis=-1)
 
-                # CHANGES: Add another fully connected layer to encode the categorical features
-                self.feature_embedding = tf.compat.v1.layers.dense(self.item_features, self.hidden_size + 1,
-                                                                   activation=None)
-                dot_product = tf.matmul(self.states_hidden,
-                                        tf.transpose(self.feature_embedding[:, :, :-1], perm=[0, 2, 1]))
-                reshaped_dot_product = tf.reshape(dot_product, shape=(-1, item_num))
 
-                self.phi_prime = reshaped_dot_product + self.feature_embedding[:, :, -1]
-                # print("lambda_value", args.lambda_value)
+            ce_loss_pre = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
+            ce_loss_post = tf.multiply(self.ips,ce_loss_pre)
 
-                # lambda_value = self.lambda_values
-                # one_tensor = tf.ones_like(self.lambda_values)
-                # one_minus_lambda = tf.math.subtract(one_tensor, self.lambda_values)
-                # self.final_score = lambda_value * self.output2 + (1 - lambda_value) * self.phi_prime
-                self.final_score = tf.add(
-                    tf.multiply(self.lambda_values_expanded, self.output2),
-                    tf.multiply(tf.subtract(1.0, self.lambda_values_expanded), self.phi_prime)
-                )
+            q_indexed_positive = tf.stop_gradient(indexing_ops.batched_index(self.output1, self.actions))
+            q_indexed_negative = 0
+            
+           
+            for i in range(self.neg):
+                negative=tf.gather(self.negative_actions, i, axis=1)
+                q_indexed_negative+=tf.stop_gradient(indexing_ops.batched_index(self.output1, negative))
+            q_indexed_avg=tf.divide((q_indexed_negative+q_indexed_positive),1+self.neg)
+            advantage=q_indexed_positive-q_indexed_avg
 
-                # CHANGES: Provide the final score in the cross-entropy loss
-                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.final_score)
+            if self.clip>=0:
+                advantage=tf.clip_by_value(advantage,self.clip,10)
+
+            ce_loss_post = tf.multiply(advantage, ce_loss_post)
+
+             ### adding CQL loss like in the discrete CQL portion of d3rlpy
+            cql_loss=0
+            if self.use_CQL:
+            
+                cql_loss_positive = compute_cql_loss(self.output1, q_indexed_positive)
+                cql_loss_negative = compute_cql_loss(self.output1, q_indexed_negative)
+
+
+
+            ### Incorporating CQL into loss1
+            if self.use_CQL:
+                self.loss1 = tf.reduce_mean(input_tensor=(qloss_positive+self.CQL_alpha*cql_loss_positive) + (qloss_negative + self.CQL_alpha*cql_loss_negative) + ce_loss_pre) 
+
             else:
-                ce_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.actions, logits=self.output2)
+                self.loss1 = tf.reduce_mean(input_tensor=qloss_positive+qloss_negative+ce_loss_pre)
+            
+            self.opt1 = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss1)
+            self.loss2 = tf.reduce_mean(input_tensor=self.weight*(qloss_positive + qloss_negative) + ce_loss_post)
+            self.opt2 = tf.compat.v1.train.AdamOptimizer(self.lr_2).minimize(self.loss2)
 
-            # self.loss = tf.reduce_mean(self.weight * (qloss_positive + qloss_negative) + ce_loss)
-            self.loss = tf.reduce_mean(0 + ce_loss)
-            self.opt = tf.compat.v1.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
     def initialize_embeddings(self):
         all_embeddings = dict()
         if self.pretrain == False:
             with tf.compat.v1.variable_scope(self.name):
                 state_embeddings = tf.Variable(tf.random.normal([self.item_num + 1, self.hidden_size], 0.0, 0.01),
-                                               name='state_embeddings')
+                                           name='state_embeddings')
                 pos_embeddings = tf.Variable(tf.random.normal([self.state_size, self.hidden_size], 0.0, 0.01),
                                              name='pos_embeddings')
                 all_embeddings['state_embeddings'] = state_embeddings
@@ -376,12 +343,80 @@ class QNetwork:
         #     print("load!")
         return all_embeddings
 
+def evaluate(sess, datatype='val'):
+    eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_val.df'))
+    if datatype == 'test':
+        eval_sessions=pd.read_pickle(os.path.join(data_directory, 'sampled_test.df'))
+    eval_ids = eval_sessions.session_id.unique()
+    groups = eval_sessions.groupby('session_id')
+    batch = 100
+    evaluated=0
+    total_clicks=0.0
+    total_purchase = 0.0
+    total_reward = [0, 0, 0, 0]
+    hit_clicks=[0,0,0,0]
+    ndcg_clicks=[0,0,0,0]
+    hit_purchase=[0,0,0,0]
+    ndcg_purchase=[0,0,0,0]
+
+    #off_prob_total=[0.0]
+    off_prob_click=[0.0]
+    off_prob_purchase=[0.0]
+
+
+    off_click_ng=[0.0]
+    off_purchase_ng=[0.0]
+
+    while evaluated<len(eval_ids):
+        states, len_states, actions, rewards = [], [], [], []
+        for i in range(batch):
+            if evaluated==len(eval_ids):
+                break
+            id=eval_ids[evaluated]
+            group=groups.get_group(id)
+            history=[]
+            for index, row in group.iterrows():
+                state=list(history)
+                len_states.append(state_size if len(state)>=state_size else 1 if len(state)==0 else len(state))
+                state=pad_history(state,state_size,item_num)
+                states.append(state)
+                action=row['item_id']
+                is_buy=row['is_buy']
+                reward = reward_buy if is_buy == 1 else reward_click
+                if is_buy==1:
+                    total_purchase+=1.0
+                else:
+                    total_clicks+=1.0
+                actions.append(action)
+                rewards.append(reward)
+                history.append(row['item_id'])
+            evaluated+=1
+        prediction=sess.run(QN_1.output2, feed_dict={QN_1.inputs: states,QN_1.len_state:len_states,QN_1.is_training:False})
+        sorted_list=np.argsort(prediction)
+        calculate_hit(sorted_list,topk,actions,rewards,reward_click,total_reward,hit_clicks,ndcg_clicks,hit_purchase,ndcg_purchase)
+        calculate_off(sorted_list,actions,rewards,reward_click,off_click_ng,off_purchase_ng,off_prob_click,off_prob_purchase,pop_dict)
+    print('#############################################################')
+    print('total clicks: %d, total purchase:%d' % (total_clicks, total_purchase))
+    for i in range(len(topk)):
+        hr_click=hit_clicks[i]/total_clicks
+        hr_purchase=hit_purchase[i]/total_purchase
+        ng_click=ndcg_clicks[i]/total_clicks
+        ng_purchase=ndcg_purchase[i]/total_purchase
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('cumulative reward @ %d: %f' % (topk[i],total_reward[i]))
+        print('clicks hr ndcg @ %d : %f, %f' % (topk[i],hr_click,ng_click))
+        print('purchase hr and ndcg @%d : %f, %f' % (topk[i], hr_purchase, ng_purchase))
+    off_click_ng=off_click_ng[0]/off_prob_click[0]
+    off_purchase_ng=off_purchase_ng[0]/off_prob_purchase[0]
+    print('off-line corrected evaluation (click_ng,purchase_ng)@10: %f, %f' % (off_click_ng, off_purchase_ng))
+    print('#############################################################')
+
 
 if __name__ == '__main__':
+    tf.compat.v1.disable_eager_execution()
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     # Network parameters
     args = parse_args()
-    # gpus = tf.config.experimental.list_physical_devices('GPU')
-    # tf.config.experimental.set_memory_growth(gpus[0], True)
 
     data_directory = args.data
     data_statis = pd.read_pickle(
@@ -390,54 +425,38 @@ if __name__ == '__main__':
     item_num = data_statis['item_num'][0]  # total number of items
     reward_click = args.r_click
     reward_buy = args.r_buy
-    reward_negative = args.r_negative
-    topk = [5, 10, 15, 20]
-
-
+    reward_negative=args.r_negative
+    topk=[5,10,15,20]
     # save_file = 'pretrain-GRU/%d' % (hidden_size)
-
-
-
-    # item features
-    item_features_csv = os.path.join(data_directory,
-                                     'category_item_filter_2.csv')  # Replace this with the path to your CSV file
-    item_features_df = pd.read_csv(item_features_csv)
-    item_features_df.sort_values(by='item_id', inplace=True)
-    # item_features_df = item_features_df[['item_id', 'popularity']]
-    feature_dim = item_features_df.shape[1] - 1  # Assuming the first column is itemid and the rest are features
-    item_features_np = item_features_df.iloc[:, 1:].values.reshape(-1, item_num, feature_dim)
-
-    # item_features_np = item_features_df.iloc[:, 1:].values
-
-    # print("feature_dim",feature_dim)
-    # item_features_array = item_features_df.values[:, 1:].astype(np.float32)  # Assuming the first column is the itemid
-    # padding_row = np.zeros((1, item_features_array.shape[1]), dtype=np.float32)
-    # item_features_array = np.vstack((padding_row, item_features_array))
 
     tf.compat.v1.reset_default_graph()
 
     QN_1 = QNetwork(name='QN_1', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
+                    state_size=state_size, pretrain=False)
     QN_2 = QNetwork(name='QN_2', hidden_size=args.hidden_factor, learning_rate=args.lr, item_num=item_num,
-                    state_size=state_size, pretrain=False, feature_dim=feature_dim)
+                    state_size=state_size, pretrain=False)
 
     replay_buffer = pd.read_pickle(os.path.join(data_directory, 'replay_buffer.df'))
-    # print(replay_buffer.head())
-    # saver = tf.train.Saver()
 
-    total_step = 0
+    f = open(os.path.join(data_directory, 'pop_dict.txt'), 'r')
+    pop_dict = eval(f.read())
+    f.close()
+    # saver = tf.train.Saver()
+    # off_eval=args.off_eval
+
+    total_step=0
     with tf.compat.v1.Session() as sess:
         # Initialize variables
         sess.run(tf.compat.v1.global_variables_initializer())
-        # evaluate(sess)
-        num_rows = replay_buffer.shape[0]
-        num_batches = int(num_rows / args.batch_size)
+        #evaluate(sess)
+        num_rows=replay_buffer.shape[0]
+        num_batches=int(num_rows/args.batch_size)
         for i in range(args.epoch):
+            print(f"epoch {i+1}")
             for j in range(num_batches):
                 batch = replay_buffer.sample(n=args.batch_size).to_dict()
-                # print(batch)
 
-                # state = list(batch['state'].values())
+                #state = list(batch['state'].values())
 
                 next_state = list(batch['next_state'].values())
                 len_next_state = list(batch['len_next_states'].values())
@@ -452,11 +471,11 @@ if __name__ == '__main__':
                 target_Qs = sess.run(target_QN.output1,
                                      feed_dict={target_QN.inputs: next_state,
                                                 target_QN.len_state: len_next_state,
-                                                target_QN.is_training: True})
+                                                target_QN.is_training:True})
                 target_Qs_selector = sess.run(mainQN.output1,
                                               feed_dict={mainQN.inputs: next_state,
                                                          mainQN.len_state: len_next_state,
-                                                         mainQN.is_training: True})
+                                                         mainQN.is_training:True})
                 # Set target_Qs to 0 for states where episode ends
                 is_done = list(batch['is_done'].values())
                 for index in range(target_Qs.shape[0]):
@@ -468,51 +487,84 @@ if __name__ == '__main__':
                 target_Q_current = sess.run(target_QN.output1,
                                             feed_dict={target_QN.inputs: state,
                                                        target_QN.len_state: len_state,
-                                                       target_QN.is_training: True})
+                                                       target_QN.is_training:True})
                 target_Q__current_selector = sess.run(mainQN.output1,
                                                       feed_dict={mainQN.inputs: state,
                                                                  mainQN.len_state: len_state,
-                                                                 mainQN.is_training: True})
+                                                                 mainQN.is_training:True})
                 action = list(batch['action'].values())
-                negative = []
+                negative=[]
 
                 for index in range(target_Qs.shape[0]):
-                    negative_list = []
+                    negative_list=[]
                     for i in range(args.neg):
-                        neg = np.random.randint(item_num)
-                        while neg == action[index]:
+                        neg=np.random.randint(item_num)
+                        while neg==action[index]:
                             neg = np.random.randint(item_num)
                         negative_list.append(neg)
                     negative.append(negative_list)
 
-                is_buy = list(batch['is_buy'].values())
-                reward = []
+                is_buy=list(batch['is_buy'].values())
+                reward=[]
                 for k in range(len(is_buy)):
                     reward.append(reward_buy if is_buy[k] == 1 else reward_click)
                 discount = [args.discount] * len(action)
 
-                # lambda_values=[x/state_size for x in len_state]
-                lambda_values = cal_lambda(len_state)
-                # lambda_values = [ 1.0 for x in len_state]
 
-                # print("item_features_np",item_features_np.shape)
-                loss, _ = sess.run([mainQN.loss, mainQN.opt],
-                                   feed_dict={mainQN.inputs: state,
-                                              mainQN.len_state: len_state,
-                                              mainQN.targetQs_: target_Qs,
-                                              mainQN.reward: reward,
-                                              mainQN.discount: discount,
-                                              mainQN.actions: action,
-                                              mainQN.targetQs_selector: target_Qs_selector,
-                                              mainQN.negative_actions: negative,
-                                              mainQN.targetQ_current_: target_Q_current,
-                                              mainQN.targetQ_current_selector: target_Q__current_selector,
-                                              mainQN.is_training: True,
-                                              mainQN.item_features: item_features_np,
-                                              mainQN.lambda_values: lambda_values
-                                              })
-                total_step += 1
-                if total_step % 200 == 0:
-                    print("the loss in %dth batch is: %f" % (total_step, loss))
-                if total_step % 4000 == 0:
-                    evaluate(sess, item_features_np)
+                if total_step < 15000:
+
+                    loss, _ = sess.run([mainQN.loss1, mainQN.opt1],
+                                       feed_dict={mainQN.inputs: state,
+                                                  mainQN.len_state: len_state,
+                                                  mainQN.targetQs_: target_Qs,
+                                                  mainQN.reward: reward,
+                                                  mainQN.discount: discount,
+                                                  mainQN.actions: action,
+                                                  mainQN.targetQs_selector: target_Qs_selector,
+                                                  mainQN.negative_actions: negative,
+                                                  mainQN.targetQ_current_: target_Q_current,
+                                                  mainQN.targetQ_current_selector: target_Q__current_selector,
+                                                  mainQN.is_training:True
+                                                  })
+                    total_step += 1
+                    if total_step % 200 == 0:
+                        print("the loss in %dth batch is: %f" % (total_step, loss))
+                    if total_step % 8000 == 0:
+                        print("\nBeginning evaluation...")
+                        evaluate(sess)
+                else:
+
+                    behavior_prob = []
+                    for a in action:
+                        behavior_prob.append(pop_dict[a])
+
+                    loss, _ = sess.run([mainQN.loss2, mainQN.opt2],
+                                       feed_dict={mainQN.inputs: state,
+                                                  mainQN.len_state: len_state,
+                                                  mainQN.targetQs_: target_Qs,
+                                                  mainQN.reward: reward,
+                                                  mainQN.discount: discount,
+                                                  mainQN.actions: action,
+                                                  mainQN.targetQs_selector: target_Qs_selector,
+                                                  mainQN.negative_actions: negative,
+                                                  mainQN.targetQ_current_: target_Q_current,
+                                                  mainQN.targetQ_current_selector: target_Q__current_selector,
+                                                  mainQN.behavior_prob: behavior_prob,
+                                                  mainQN.is_training:True
+                                                  })
+                    total_step += 1
+                    if total_step % 200 == 0:
+                        print("the loss in %dth batch is: %f" % (total_step, loss))
+                    #if total_step % 8000 == 0:
+                    #    print("\nBeginning evaluation...")
+                    #    evaluate(sess)
+        
+        # Training completed
+        print("Training completed...")
+        print("Evaluating test dataset...\n")
+
+        # Evaluate sampled test dataset
+        evaluate(sess, datatype='test')
+
+
+
