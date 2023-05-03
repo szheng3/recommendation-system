@@ -9,7 +9,7 @@
 ## Item Features
 In our project, we combine the SNQN models with item features mentioned in the HRNN paper using the following formula:
 
-<img width="625" alt="CleanShot 2023-05-02 at 23 45 00@2x" src="https://user-images.githubusercontent.com/16725501/235829137-a75a658c-95e1-4d54-9117-feeb746d17c9.png">
+![image](https://user-images.githubusercontent.com/16725501/235829137-a75a658c-95e1-4d54-9117-feeb746d17c9.png)
 
 The implementation of this code can be found in the `SNQN_item_feature.py` file. We create a dense layer for the feature embedding and compute the dot product between the states hidden and the feature embedding:
 
