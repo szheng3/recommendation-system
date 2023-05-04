@@ -163,7 +163,6 @@ Yilun Wu: Worked on the item features of our project; completed the exploratory 
 |   |       |-- replay_buffer.py
 |   |       |-- split_data.py
 |   |       `-- utility.py
-|   |-- notebooks
 |   |-- HM_SNQN_ITEM_FEATURE.ipynb
 |   |-- RC_SNQN_ITEM_FEATURE.ipynb
 |   `-- README.md
