@@ -26,6 +26,9 @@ where:
 
 * τ: A constant term.
 
+This becomes an additional term in the overall loss term. 
+
+
 ## Our Approach
 
 
