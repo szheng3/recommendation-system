@@ -40,7 +40,7 @@ Open `/DRL2/RR_CQL_SA2C_Recommender.ipynb` in Google Colab. This notebook contai
 
 **Train SASRec-SNQN on RetailRocket:**
 
-Open `/DRL2/SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
+Open `/DRL2/RR_SNQN_Recommender.ipynb` in Google Colab. This notebook contains all code necessary to run training and view results. This notebook will run both with and without CQL Loss. Evaluation Metrics can be found below.
 
 **Train SASRec-SA2C on HM:**
 
