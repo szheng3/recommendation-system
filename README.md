@@ -52,15 +52,15 @@ least two offline evaluation metrics are used for benchmarking
 |   |   |   |-- SA2C_v3_5.py              --- SA2C model with CQL Loss added as paramter (version used in notebooks)
 |   |   |   |-- SA2C_v4.py
 |   |   |   |-- SASRecModules_v2.py
-|   |   |   |-- SNQN_v2.py                --- SNQN model with CQL Loss added as parameter
-|   |   |   |-- SNQN_v2_HM.py             --- SNQN model with CQL Loss added as parameter for H&M Dataset
+|   |   |   |-- SNQN_v2.py                  --- SNQN +/- CQL Model for RR
+|   |   |   |-- SNQN_v2_HM.py               --- SNQN +/- CQL Model for HM
 |   |   |   |-- gen_replay_buffer.py
 |   |   |   |-- gen_replay_buffer_HM.py
 |   |   |   `-- utility_v2.py
-|   |   |-- HM_CQL_SA2C_Recommender.ipynb --- Run SASRec-SA2C on H&M Dataset with and without CQL Loss
-|   |   |-- HM_SNQN_Recommender.ipynb     --- Run SASRec-SNQN on H&M Dataset with and without CQL Loss
-|   |   |-- RR_CQL_SA2C_Recommender.ipynb --- Run SASRec-SA2C on RetailRocket Dataset with and without CQL Loss
-|   |   `-- RR_SNQN_Recommender.ipynb     --- Run SASRec-SNQN on RetailRocket Dataset with and without CQL Loss
+|   |   |-- HM_CQL_SA2C_Recommender.ipynb   --- Run SA2C +/- CQL on HM
+|   |   |-- HM_SNQN_Recommender.ipynb       --- Run SNQN +/- CQL on HM
+|   |   |-- RR_CQL_SA2C_Recommender.ipynb   --- Run SA2C +/- CQL on RR
+|   |   `-- SNQN_Recommender.ipynb          --- Run SNQN +/- CQL on RR
 |   |-- Data
 |   |   |-- HM_data
 |   |   |   `-- README.md
