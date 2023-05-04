@@ -51,16 +51,15 @@ least two offline evaluation metrics are used for benchmarking
 |   |   |   |-- SA2C_v3_5.py
 |   |   |   |-- SA2C_v4.py
 |   |   |   |-- SASRecModules_v2.py
-|   |   |   |-- SNQN_v2.py
-|   |   |   |-- SNQN_v2_HM.py
+|   |   |   |-- SNQN_v2.py                  --- SNQN +/- CQL Model for RR
+|   |   |   |-- SNQN_v2_HM.py               --- SNQN +/- CQL Model for HM
 |   |   |   |-- gen_replay_buffer.py
 |   |   |   |-- gen_replay_buffer_HM.py
 |   |   |   `-- utility_v2.py
-|   |   |-- HM_CQL_SA2C_Recommender.ipynb
-|   |   |-- HM_SNQN_Recommender.ipynb
-|   |   |-- RR_CQL_SA2C_Recommender.ipynb
-|   |   |-- SA2C_Reommender_forv4.ipynb
-|   |   `-- SNQN_Recommender.ipynb
+|   |   |-- HM_CQL_SA2C_Recommender.ipynb   --- Run SA2C +/- CQL on HM
+|   |   |-- HM_SNQN_Recommender.ipynb       --- Run SNQN +/- CQL on HM
+|   |   |-- RR_CQL_SA2C_Recommender.ipynb   --- Run SA2C +/- CQL on RR
+|   |   `-- SNQN_Recommender.ipynb          --- Run SNQN +/- CQL on RR
 |   |-- Data
 |   |   |-- HM_data
 |   |   |   `-- README.md
