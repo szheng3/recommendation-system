@@ -166,7 +166,7 @@ Yilun Wu: Worked on the item features of our project; completed the exploratory 
 |   |-- HM_SNQN_ITEM_FEATURE.ipynb       --- Run H&M SNQN with or without item feature model
 |   |-- RC_SNQN_ITEM_FEATURE.ipynb       --- Run RetailRockets SNQN with or without item feature model
 |   `-- README.md
-|-- EDA_HM.ipynb                         --- EDA for HM dataset
+|-- EDA_HM.ipynb                         --- EDA for H&M dataset
 |-- EDA_RetailRocket.ipynb               --- EDA for RetailRocket dataset
 |-- README.md
 `-- requirements.txt
