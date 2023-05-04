@@ -4,8 +4,8 @@
 - [Running the Code](#instructions-for-running-the-code)
 - [RetailRocket Results](#retailrocket-results)
 - [H&M Results](#hm-results)
-- [Notes](#notes)
 - [Conclusion](#notes)
+- [Notes](#notes)
 
 ## Item Features
 In our project, we combine the SNQN models with item features mentioned in the HRNN paper using the following formula:
