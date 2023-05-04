@@ -13,10 +13,10 @@ Conservative Q-Learning [(CQL)](https://arxiv.org/abs/2006.04779) algorithm is a
 This loss function is given by:
 
 ```
-\[L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}
+$$\[L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}
     \left[\log{\sum_a \exp{Q_{\theta_i}(s_t, a)}}
      - \mathbb{E}_{a \sim D} \big[Q_{\theta_i}(s_t, a)\big] - \tau\right]
-    + L_\mathrm{SAC}(\theta_i)\]
+    + L_\mathrm{SAC}(\theta_i)\]$$
 ```
 where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-value for the state-action pair, and Q(s, a') is the Q-value for the state and other actions. 
 
