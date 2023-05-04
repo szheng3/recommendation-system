@@ -30,15 +30,16 @@ least two offline evaluation metrics are used for benchmarking
 .
 |-- Explore_CQL
 |   |-- DRL2
-|   |   |-- notebooks
+|   |   |-- notebooks                     --- Folder containing archived notebooks we worked on but didn't use in the end
 |   |   |   |-- HM_SA2C_Recommender.ipynb
 |   |   |   |-- HM_SA2C_SASres_CQL_Recommender.ipynb
 |   |   |   |-- SA2C_Alt_Recommender.ipynb
 |   |   |   |-- SA2C_Recommender.ipynb
 |   |   |   |-- SA2C_SASRec_CQL_Recommender.ipynb
-|   |   |   `-- SA2C_SASres_CQL_Recommender.ipynb
+|   |   |   |-- SA2C_SASres_CQL_Recommender.ipynb
+|   |   |   `-- SA2C_Reommender_forv4.ipynb
 |   |   |-- src
-|   |   |   |-- archive
+|   |   |   |-- archive                   --- Folder containing archived code we worked on but didn't end up using 
 |   |   |   |   |-- CQL_young_version.py
 |   |   |   |   |-- SA2C_comp_v2.py
 |   |   |   |   |-- SA2C_v2.py
@@ -48,19 +49,18 @@ least two offline evaluation metrics are used for benchmarking
 |   |   |   |-- CQL_d3rlpy_version.py
 |   |   |   |-- CQL_loss.py
 |   |   |   |-- NextItNetModules_v2.py
-|   |   |   |-- SA2C_v3_5.py
+|   |   |   |-- SA2C_v3_5.py              --- SA2C model with CQL Loss added as paramter (version used in notebooks)
 |   |   |   |-- SA2C_v4.py
 |   |   |   |-- SASRecModules_v2.py
-|   |   |   |-- SNQN_v2.py
-|   |   |   |-- SNQN_v2_HM.py
+|   |   |   |-- SNQN_v2.py                --- SNQN model with CQL Loss added as parameter
+|   |   |   |-- SNQN_v2_HM.py             --- SNQN model with CQL Loss added as parameter for H&M Dataset
 |   |   |   |-- gen_replay_buffer.py
 |   |   |   |-- gen_replay_buffer_HM.py
 |   |   |   `-- utility_v2.py
-|   |   |-- HM_CQL_SA2C_Recommender.ipynb
-|   |   |-- HM_SNQN_Recommender.ipynb
-|   |   |-- RR_CQL_SA2C_Recommender.ipynb
-|   |   |-- SA2C_Reommender_forv4.ipynb
-|   |   `-- SNQN_Recommender.ipynb
+|   |   |-- HM_CQL_SA2C_Recommender.ipynb --- Run SASRec-SA2C on H&M Dataset with and without CQL Loss
+|   |   |-- HM_SNQN_Recommender.ipynb     --- Run SASRec-SNQN on H&M Dataset with and without CQL Loss
+|   |   |-- RR_CQL_SA2C_Recommender.ipynb --- Run SASRec-SA2C on RetailRocket Dataset with and without CQL Loss
+|   |   `-- RR_SNQN_Recommender.ipynb     --- Run SASRec-SNQN on RetailRocket Dataset with and without CQL Loss
 |   |-- Data
 |   |   |-- HM_data
 |   |   |   `-- README.md
@@ -102,7 +102,7 @@ least two offline evaluation metrics are used for benchmarking
 |   |-- HM_SNQN_ITEM_FEATURE.ipynb       --- Run H&M SNQN with or without item feature model
 |   |-- RC_SNQN_ITEM_FEATURE.ipynb       --- Run RetailRockets SNQN with or without item feature model
 |   `-- README.md
-|-- EDA_HM.ipynb                         --- EDA for H&M dataset
+|-- EDA_HM.ipynb                         --- EDA for HM dataset
 |-- EDA_RetailRocket.ipynb               --- EDA for RetailRocket dataset
 |-- README.md
 `-- requirements.txt
