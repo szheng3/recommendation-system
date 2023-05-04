@@ -75,6 +75,7 @@ If we define *C* to be the number of users with the correct answer recommended t
 
 $$ HR = \frac{C}{T}$$
 
+
 ## Contributions
 
 Chad Miller: Provided initial implementation of CQL-Loss for SASRec-SA2C model on the Retail Rocket dataset with driver found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DRL2/RR_CQL_SA2C_Recommender.ipynb), model found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DRL2/src/SA2C_v3_5.py). Also worked on the H&M dataset after additional alterations to the source code to make it compatiable with the H&M dataset, which can be found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DRL2/src/SA2C_v3_5.py). I trained and evaluated the SASRec-SA2C model on the Retail Rocket and H&M datasets and added the results found [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DRL2/RR_CQL_SA2C_Recommender.ipynb) and [here](https://github.com/szheng3/recommendation-system/blob/main/Explore_CQL/DRL2/HM_CQL_SA2C_Recommender.ipynb). Worked on the README and repository organization. 
@@ -86,6 +87,91 @@ Bryce Whitney: Worked on the implementation of CQL-Loss for the SASRec-SNQN mode
 Shuai Zheng: Worked on the item features of our project, combining SNQN with item features in the [SNQN_item_features.py](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/Retailrocket/src/SNQN_item_feature.py) file for both RetailRocket and HM datasets, and creating a version of SNQN without item features in the [SNQN_new.py](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/Retailrocket/src/SNQN_new.py) file. I also updated a README file specifically for the item features and coded the main notebook with two new files, [HM_SNQN_ITEM_FEATURE.ipynb](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/HM_SNQN_ITEM_FEATURE.ipynb) and [RC_SNQN_ITEM_FEATURE.ipynb](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/RC_SNQN_ITEM_FEATURE.ipynb), to run the item features. Additionally, I handled category item features and updated [gen_replay_buffer.py](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/HM/src/gen_replay_buffer.py) in H&M datasets to get `item_ids.csv`.
 
 Yilun Wu: Worked on the item features of our project; completed the exploratory data analysis ([EDA](#eda)) for both RetailRocket dataset and H&M dataset; updated the README file and notebooks for model training ([HM_SNQN_ITEM_FEATURE.ipynb](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/HM_SNQN_ITEM_FEATURE.ipynb) and [RC_SNQN_ITEM_FEATURE.ipynb](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/RC_SNQN_ITEM_FEATURE.ipynb)); evaluated based on training results and decided the final item features chosen for deep reinforcement learning recommendation model for each data set, details in the [SNQN_item_features.py](https://github.com/szheng3/recommendation-system/blob/main/ItemFeatures/Retailrocket/src/SNQN_item_feature.py).
+
+## Folder Structure
+
+```
+.
+|-- Explore_CQL
+|   |-- DRL2
+|   |   |-- notebooks
+|   |   |   |-- HM_SA2C_Recommender.ipynb
+|   |   |   |-- HM_SA2C_SASres_CQL_Recommender.ipynb
+|   |   |   |-- SA2C_Alt_Recommender.ipynb
+|   |   |   |-- SA2C_Recommender.ipynb
+|   |   |   |-- SA2C_SASRec_CQL_Recommender.ipynb
+|   |   |   `-- SA2C_SASres_CQL_Recommender.ipynb
+|   |   |-- src
+|   |   |   |-- archive
+|   |   |   |   |-- CQL_young_version.py
+|   |   |   |   |-- SA2C_comp_v2.py
+|   |   |   |   |-- SA2C_v2.py
+|   |   |   |   |-- SA2C_v2backupcopy.py
+|   |   |   |   |-- SA2C_v3.py
+|   |   |   |   `-- SA2C_vAndrew.py
+|   |   |   |-- CQL_d3rlpy_version.py
+|   |   |   |-- CQL_loss.py
+|   |   |   |-- NextItNetModules_v2.py
+|   |   |   |-- SA2C_v3_5.py
+|   |   |   |-- SA2C_v4.py
+|   |   |   |-- SASRecModules_v2.py
+|   |   |   |-- SNQN_v2.py
+|   |   |   |-- SNQN_v2_HM.py
+|   |   |   |-- gen_replay_buffer.py
+|   |   |   |-- gen_replay_buffer_HM.py
+|   |   |   `-- utility_v2.py
+|   |   |-- HM_CQL_SA2C_Recommender.ipynb
+|   |   |-- HM_SNQN_Recommender.ipynb
+|   |   |-- RR_CQL_SA2C_Recommender.ipynb
+|   |   |-- SA2C_Reommender_forv4.ipynb
+|   |   `-- SNQN_Recommender.ipynb
+|   |-- Data
+|   |   |-- HM_data
+|   |   |   `-- README.md
+|   |   `-- RR_data
+|   |       |-- README.md
+|   |       `-- blank.txt
+|   `-- README.md
+|-- ItemFeatures
+|   |-- HM
+|   |   |-- data
+|   |   |   |-- hm_item_features.csv
+|   |   |   |-- item_ids.csv
+|   |   |   `-- readme.md
+|   |   `-- src
+|   |       |-- NextItNetModules.py
+|   |       |-- SASRecModules.py
+|   |       |-- SNQN_item_feature.py
+|   |       |-- SNQN_new.py
+|   |       |-- gen_replay_buffer.py
+|   |       |-- utility.py
+|   |       `-- utility_v2.py
+|   |-- Retailrocket
+|   |   |-- data
+|   |   |   |-- category_item.csv
+|   |   |   `-- rc_item_features.csv
+|   |   `-- src
+|   |       |-- DQN_NS.py
+|   |       |-- NextItNetModules.py
+|   |       |-- SA2C.py
+|   |       |-- SASRecModules.py
+|   |       |-- SNQN.py
+|   |       |-- SNQN_item_feature.py
+|   |       |-- SNQN_new.py
+|   |       |-- pop.py
+|   |       |-- preprocess_kaggle.py
+|   |       |-- replay_buffer.py
+|   |       |-- split_data.py
+|   |       `-- utility.py
+|   |-- notebooks
+|   |-- HM_SNQN_ITEM_FEATURE.ipynb
+|   |-- RC_SNQN_ITEM_FEATURE.ipynb
+|   `-- README.md
+|-- EDA_HM.ipynb
+|-- EDA_RetailRocket.ipynb
+|-- README.md
+`-- requirements.txt
+```
 
 ## References
 
