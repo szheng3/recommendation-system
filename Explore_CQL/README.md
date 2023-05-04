@@ -125,5 +125,8 @@ Open `/DRL2/HM_SNQN_Recommender.ipynb` in Google Colab. This notebook contains a
 |SASRec-SNQN|0.0556|0.0607|0.0633|0.0652|0.0730|0.0889|0.0987|0.1068
 </td></tr> </table>
 
+### Conclusions
+From the above analysis, we have observed a small increase (approximately 10%) in HDCG and HR values for the Retail Rocket dataset using SA2C-SASrec and CQL as implemented. We do not show the same benefit with the other comparisons (SASRec-SNQN model and the H&M dataset). This may be due to the choice of hyperparameters such as alpha, and may need further finetuning to achieve the expected benefit.  
+
 ### Notes
 Please refer to [README.md](https://github.com/szheng3/recommendation-system/blob/main/README.md) for details on evaluation metrics.
