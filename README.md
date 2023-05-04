@@ -71,8 +71,8 @@ least two offline evaluation metrics are used for benchmarking
 |-- ItemFeatures
 |   |-- HM
 |   |   |-- data
-|   |   |   |-- hm_item_features.csv
-|   |   |   |-- item_ids.csv
+|   |   |   |-- hm_item_features.csv    --- Generatad from EDA_HM.ipynb   
+|   |   |   |-- item_ids.csv            --- Generatad from gen_replay_buffer.py  
 |   |   |   `-- readme.md
 |   |   `-- src
 |   |       |-- NextItNetModules.py
@@ -85,7 +85,7 @@ least two offline evaluation metrics are used for benchmarking
 |   |-- Retailrocket
 |   |   |-- data
 |   |   |   |-- category_item.csv
-|   |   |   `-- rc_item_features.csv
+|   |   |   `-- rc_item_features.csv    --- Generatad from EDA_EDA_RetailRocket.ipynb   
 |   |   `-- src
 |   |       |-- DQN_NS.py
 |   |       |-- NextItNetModules.py
