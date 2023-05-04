@@ -101,7 +101,7 @@ in 4000th batch
 
 ### Conclusion
 
-According to the table above, increasing the lambda value leads to better results. This suggests that combining item features with SNQN is effective. However, when lambda is set to 0 (i.e., using item features without SNQN), it has a negligible impact on the result. When lambda is set to 0.5 (i.e., using item features and SNQN equally), the performance is worse than when lambda is set to 1 (i.e., using SNQN without item features). This implies that, in general, item features help when there is a cold start (i.e., when there is little user history available), whereas SNQN becomes more important when there is sufficient user history.
+According to the table above, the lambda value leads to different results. This suggests that combining item features with SNQN is effective. However, when lambda is set to 0 (i.e., using item features without SNQN), it has a negligible impact on the result. When lambda is set to 0.5 (i.e., using item features and SNQN equally), the performance is worse than when lambda is set to 1 (i.e., using SNQN without item features). This implies that, in general, item features help when there is a cold start (i.e., when there is little user history available), whereas SNQN becomes more important when there is sufficient user history.
 
 
 
