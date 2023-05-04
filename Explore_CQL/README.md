@@ -11,11 +11,16 @@
 Conservative Q-Learning [(CQL)](https://arxiv.org/abs/2006.04779) algorithm is a SAC-based data-driven deep reinforcement learning algorithm, which achieves state-of-the-art performance in offline RL problems. CQL mitigates overestimation error by using a conservative policy update by incorporating a penalty term based on the estimation of the expected maximum action value under the current policy. As a result, the CQL loss encourages the agent to explore more efficiently by contrasting its Q-values against the Q-values of other actions that are not in the dataset. Discrete CQL, as implemented in [d3rlpy](https://d3rlpy.readthedocs.io/en/v1.1.1/references/generated/d3rlpy.algos.CQL.html?highlight=cql), applies the same principles to discrete action spaces, making it suitable for use with algorithms like DQN.
 
 This loss function is given by:
+```
+CQL_loss_component = α * (log_sum_exp(Q_values) - E[Q_values] - τ)
 
-
-$$ L(\theta_i) = \alpha\, \mathbb{E}_{s_t \sim D}\left[\log{\sum_a \exp{Q_{\theta_i}(s_t, a)}} - \mathbb{E}_{a \sim D} \big[Q_{\theta_i}(s_t,a)\big] - \tau\right]+ L_\mathrm{SAC}(\theta_i) $$
-
-where E(s, a) denotes expectation over states and actions, Q(s, a) is the Q-value for the state-action pair, and Q(s, a') is the Q-value for the state and other actions. 
+```
+where: 
+CQL_loss_component: The Conservative Q-Learning loss component.
+α: The CQL regularization coefficient.
+log_sum_exp(Q_values): The log of the sum of exponentials of the Q-values for all possible actions in a given state. It is calculated as log(∑_a exp(Q(s, a))).
+E[Q_values]: The expectation of the Q-values over the actions, calculated as the mean of the Q-values for all possible actions in a given state. It is calculated as (1/|A|) * ∑_a Q(s, a), where |A| is the number of actions.
+τ: A constant term.
 
 ## Our Approach
 
