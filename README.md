@@ -163,11 +163,11 @@ Yilun Wu: Worked on the item features of our project; completed the exploratory 
 |   |       |-- replay_buffer.py
 |   |       |-- split_data.py
 |   |       `-- utility.py
-|   |-- HM_SNQN_ITEM_FEATURE.ipynb
-|   |-- RC_SNQN_ITEM_FEATURE.ipynb
+|   |-- HM_SNQN_ITEM_FEATURE.ipynb       --- Run HM SNQN Item Feature Model
+|   |-- RC_SNQN_ITEM_FEATURE.ipynb       --- Run RetailRockets SNQN Item Feature Model
 |   `-- README.md
-|-- EDA_HM.ipynb
-|-- EDA_RetailRocket.ipynb
+|-- EDA_HM.ipynb                         --- EDA for HM dataset
+|-- EDA_RetailRocket.ipynb               --- EDA for RetailRocket dataset
 |-- README.md
 `-- requirements.txt
 ```
