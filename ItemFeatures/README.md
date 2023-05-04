@@ -5,6 +5,7 @@
 - [RetailRocket Results](#retailrocket-results)
 - [H&M Results](#hm-results)
 - [Notes](#notes)
+- [Conclusion](#notes)
 
 ## Item Features
 In our project, we combine the SNQN models with item features mentioned in the HRNN paper using the following formula:
@@ -97,6 +98,15 @@ in 4000th batch
 | SASRec-SNQN without item features          |0.021394|0.024258|0.025746|0.026787|0.028340|0.037218|0.042881|0.047297
 
 </td></tr> </table>
+
+### Conclusion
+
+According to the table above, increasing the lambda value leads to better results. This suggests that combining item features with SNQN is effective. However, when lambda is set to 0 (i.e., using item features without SNQN), it has a negligible impact on the result. When lambda is set to 0.5 (i.e., using item features and SNQN equally), the performance is worse than when lambda is set to 1 (i.e., using SNQN without item features). This implies that, in general, item features help when there is a cold start (i.e., when there is little user history available), whereas SNQN becomes more important when there is sufficient user history.
+
+
+
+
+
 
 ### Notes
 Please refer to [README.md](https://github.com/szheng3/recommendation-system/blob/main/README.md) for details on evaluation metrics.
