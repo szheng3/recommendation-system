@@ -141,8 +141,8 @@ Yilun Wu: Worked on the item features of our project; completed the exploratory 
 |   |   `-- src
 |   |       |-- NextItNetModules.py
 |   |       |-- SASRecModules.py
-|   |       |-- SNQN_item_feature.py
-|   |       |-- SNQN_new.py
+|   |       |-- SNQN_item_feature.py    --- SNQN model with item features
+|   |       |-- SNQN_new.py             --- SNQN model without item feature
 |   |       |-- gen_replay_buffer.py
 |   |       |-- utility.py
 |   |       `-- utility_v2.py
@@ -156,15 +156,15 @@ Yilun Wu: Worked on the item features of our project; completed the exploratory 
 |   |       |-- SA2C.py
 |   |       |-- SASRecModules.py
 |   |       |-- SNQN.py
-|   |       |-- SNQN_item_feature.py
-|   |       |-- SNQN_new.py
+|   |       |-- SNQN_item_feature.py     --- SNQN model with item features
+|   |       |-- SNQN_new.py              --- SNQN model without item feature
 |   |       |-- pop.py
 |   |       |-- preprocess_kaggle.py
 |   |       |-- replay_buffer.py
 |   |       |-- split_data.py
 |   |       `-- utility.py
-|   |-- HM_SNQN_ITEM_FEATURE.ipynb       --- Run HM SNQN Item Feature Model
-|   |-- RC_SNQN_ITEM_FEATURE.ipynb       --- Run RetailRockets SNQN Item Feature Model
+|   |-- HM_SNQN_ITEM_FEATURE.ipynb       --- Run H&M SNQN with or without item feature model
+|   |-- RC_SNQN_ITEM_FEATURE.ipynb       --- Run RetailRockets SNQN with or without item feature model
 |   `-- README.md
 |-- EDA_HM.ipynb                         --- EDA for HM dataset
 |-- EDA_RetailRocket.ipynb               --- EDA for RetailRocket dataset
