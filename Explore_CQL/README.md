@@ -16,15 +16,15 @@ CQL_loss_component = α * (log_sum_exp(Q_values) - E[Q_values] - τ)
 
 ```
 where: 
-- CQL_loss_component: The Conservative Q-Learning loss component.
+* CQL_loss_component: The Conservative Q-Learning loss component.
 
-- α: The CQL regularization coefficient.
+* α: The CQL regularization coefficient.
 
-- log_sum_exp(Q_values): The log of the sum of exponentials of the Q-values for all possible actions in a given state. It is calculated as log(∑_a exp(Q(s, a))).
+* log_sum_exp(Q_values): The log of the sum of exponentials of the Q-values for all possible actions in a given state. It is calculated as log(∑_a exp(Q(s, a))).
 
-- E[Q_values]: The expectation of the Q-values over the actions, calculated as the mean of the Q-values for all possible actions in a given state. It is calculated as (1/|A|) * ∑_a Q(s, a), where |A| is the number of actions.
+* E[Q_values]: The expectation of the Q-values over the actions, calculated as the mean of the Q-values for all possible actions in a given state. It is calculated as (1/|A|) * ∑_a Q(s, a), where |A| is the number of actions.
 
-- τ: A constant term.
+* τ: A constant term.
 
 ## Our Approach
 
